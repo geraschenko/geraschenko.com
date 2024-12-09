@@ -12,6 +12,8 @@
     "@astrojs/mdx": "^4.0.1",
     "@astrojs/rss": "^4.0.10",
     "@astrojs/sitemap": "^3.2.1",
-    "astro": "^5.0.3"
+    "astro": "^5.0.3",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
   }
 }

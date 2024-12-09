@@ -12,7 +12,7 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} image={heroImage} />
 		<style>
 			main {
 				width: calc(100% - 2em);
@@ -52,17 +52,23 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				font-style: italic;
 			}
 		</style>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.css" integrity="sha384-WsHMgfkABRyG494OmuiNmkAOk8nhO1qE+Y6wns6v+EoNoTNxrWxYpl5ZYWFOLPCM" crossorigin="anonymous">
 	</head>
 
 	<body>
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
-				</div>
+				{
+					heroImage && (
+						<div class="hero-image">
+							<img width={1020} height={510} src={heroImage} alt="" />
+						</div>
+					)
+				}
 				<div class="prose">
 					<div class="title">
+						<h1>{title}</h1>
 						<div class="date">
 							<FormattedDate date={pubDate} />
 							{
@@ -73,7 +79,6 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 								)
 							}
 						</div>
-						<h1>{title}</h1>
 						<hr />
 					</div>
 					<slot />
