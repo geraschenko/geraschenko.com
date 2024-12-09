@@ -1,21 +1,77 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.headshot {
+				float: right;
+			}
+			@media (max-width: 720px) {
+				.headshot {
+					float: none;
+				}
+			}
+
+			.scaled-image {
+				height: 1.5em;
+				border-radius: 0px;
+				margin-bottom: -0.4em;
+			}
+
+			main {
+				min-height: 340px;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>This is it</h1>
+			<figure class="headshot">
+				<img src="img/Anton.jpg" alt="Anton" />
+			</figure>
 			<p>
-				Nothing here now.
+				Hi, I'm Anton Geraschenko. I'm a mathematician and software engineer.
+				I currently work at <a href="https://plasmidsaurus.com">Plasmidsaurus</a>.
+				I've also worked/studied at Google, Eonite Perception, Caltech,
+				UC Berkeley, and Brandeis.
+			</p>
+			<p>
+				When I was in academia, my mathematical interests were largely
+				in algebraic geometry, particularly foundational questions about
+				algebraic stacks. I founded
+				<a href="https://mathoverflow.net"><img src="img/MOlogo.svg" alt="MathOverflow" class="scaled-image" /></a>,
+				and helped make it successful.
+			</p>
+			<p>
+				More recently I've been interested in probability, information
+				theory, and reinforcement learning. Some of my public-facing
+				projects include using millions of phones <a
+				href="https://www.nature.com/articles/s41586-024-08072-x">to map
+				the ionosphere</a> and using differentiable programming and
+				monte carlo sampling to <a
+				href="https://github.com/verilylifesciences/site-selection-tool">make
+				clinical trials faster</a>.
+			</p>
+
+			<p>
+				If you're looking for my old <a
+				href="https://stacky.net/wiki/index.php?title=Course_notes">course
+				notes</a> or <a
+				href="https://stacky.net/wiki/index.php?title=Category:Blog">blog
+				posts</a>, you can find them at my old wiki <a
+				href="https://stacky.net">stacky.net</a>. I'll
+				probably move most of that stuff here eventually.
+			</p>
+			<p>
+				You can email me at <a
+				href="mailto:geraschenko@gmail.com">geraschenko@gmail.com</a>.
 			</p>
 		</main>
 		<Footer />
