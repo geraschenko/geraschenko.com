@@ -1,0 +1,61 @@
+---
+import QGFCard from './QGFCard.astro';
+
+const { name, cards, paperclips } = Astro.props;
+const cardEntries = Object.entries(cards);
+---
+
+<div class="hand">
+  <div class="player-name">{name}</div>
+  <div class="cards">
+    {cardEntries.map(([text, paperclips], index) => (
+      <QGFCard key={index} text={text} paperclips={paperclips} />
+    ))}
+    <div class="unattached-paperclips">
+      <span>&nbsp;</span>
+      {Array.from({ length: paperclips }).map((_, index) => (
+        <span class="paperclip">📎</span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+
+.hand {
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 6px;
+  margin: 6px;
+  margin-top: -1.5em;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .hand {
+    margin-top: 0;
+  }
+}
+
+.cards {
+  display: flex;
+}
+
+.unattached-paperclips {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.player-name {
+  font-size: 1em;
+  margin: -0.3em;
+}
+
+.paperclip {
+  font-size: 1em;
+  margin: -0.3em 0;
+}
+</style>

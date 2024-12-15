@@ -1,0 +1,43 @@
+---
+const { text, paperclips } = Astro.props;
+---
+
+<div class={`card ${paperclips < 0 ? 'flipped' : ''}`}>
+    {text}
+    {Array.from({ length: paperclips }).map((_, index) => (
+      <span class="paperclip">📎</span>
+    ))}
+</div>
+
+<style>
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 6px;
+  margin: 6px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  width: 1.5em;
+  height: 6em;
+  position: relative;
+  overflow: hidden;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.paperclip {
+  font-size: 1em;
+  margin: -0.3em;
+}
+
+.flipped {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #ccc,
+    #ccc 5px,
+    #fff 5px,
+    #fff 10px
+  );
+}
+</style>
