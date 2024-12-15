@@ -1,0 +1,233 @@
+---
+title: 'Quantum Go Fish'
+description: 'A complete information game about hoarding uncertainty'
+pubDate: 2011-10-18
+updatedDate: 2024-12-15
+---
+
+-   [How to play](#how-to-play)
+    -   [How to win](#how-to-win)
+    -   [How to lose](#how-to-lose)
+-   [A sample game](#a-sample-game)
+-   [A physical deck for the game](#a-physical-deck-for-the-game)
+
+(I originally posted this [on
+stacky.net](https://stacky.net/wiki/index.php?title=Main_Page).)
+
+Quantum Go Fish is a game I learned from [Kim Morrison](http://tqft.net) while
+I was a grad student at Berkeley. Kim learned it from [Dylan
+Thurston](https://dpthurst.pages.iu.edu/). I'm pretty sure it's a descendent of
+[quantum fingers](https://everything2.com/title/Quantum+Fingers). My enthusiasm
+for the game was directly buttressed by the enthusiasm of [David
+Penneys](https://people.math.osu.edu/penneys.2/). I don't remember what version
+of the rules I originally learned. The rules described below are the ones I
+settled on after trying a bunch of tweaks with my fellow grad students.
+
+The basic nature of the game is that the players start with no information about
+any of the cards, and they reduce this uncertainty by asking and answering
+questions. "Hoarding uncertainty" is generally a good strategy. Paradoxically,
+it's a [complete information
+game](http://en.wikipedia.org/wiki/Complete_information).
+
+# How to play
+
+Any number of players can play the game. Each player starts with 4
+"cards" (traditionally simply the fingers on one of their hands).
+Nobody knows the identity of any of the cards to begin with. The players
+then take turns playing. When it is your turn, you may ask a player for
+a particular suit. If that player has any cards of that suit, she gives
+you *one* of them. The players and the game follow the following rules:
+
+1.  There are as many suits as there are players. Traditionally, the
+    suits are strange things. You get to invent the name of a suit by
+    being the first player to ask for cards of that suit.
+2.  There are precisely 4 cards of each suit.
+3.  A player may only ask for a suit which she already has a copy of.
+    This means that if you provably do not have any ducks, then you may
+    not ask another player for ducks. If you *might* have ducks, then
+    you may ask for ducks. By asking for ducks, you have determined that
+    you do have at least one duck.
+4.  If you are asked for a particular suit which you *might* have, you
+    may decide whether you do not have that suit (in which case you can
+    never ask for that suit thereafter) or whether you do have that suit
+    (in which case you must give one card of that suit to the player who
+    asked for it).
+
+## How to win
+
+A player can win in one of two ways:
+
+1.  If at the end of your turn (on your turn, you ask a question and get
+    an answer), the hands of all players are determined, you win.
+2.  If you provably have all four cards of any one suit, and no other
+    player has won (based on the previous condition), you win.
+
+## How to lose
+
+If a paradox occurs (e.g. if it turns out there are *five or more* of
+some suit in the game), then the players have allowed some illegal move
+to occur at some point, so **everybody loses**.
+
+# A sample game
+
+Suppose there are three players, unimaginatively named A, B, and C. Then
+there are three suits, which we will for simplicity call 1, 2, and 3.
+When the game starts, the three players each have four cards which could
+be anything. The state of the game is
+
+> A has ????  
+> B has ????  
+> C has ????  
+
+A goes first.
+
+> **A:** B, do you have any 1's?
+
+At this point, we know that A must have a 1, so the state of the game is
+
+> A has 1???  
+> B has ????  
+> C has ????  
+
+Since it is possible that B has a 1, and it is possible that B does not
+have a 1, B gets to choose how he answers.
+
+> **B:** Yes, I have a 1. Here you are.  
+
+B gives *one* 1 to A. Now A has at least two 1's. B may still have
+another 1. So the state of the game is
+
+> A has 11???  
+> B has ???  
+> C has ????  
+
+Now it's B's turn.
+
+> **B:** C, do you have any 1's?  
+
+By asking the question, it has been determined that B has a 1, so the
+state of the game is
+
+> A has 11???  
+> B has 1??  
+> C has ????  
+
+Suppose C answers
+
+> **C:** Yes, I have a 1. Here you are.  
+
+Now B has at least *two 1's*, and A has at least two 1's, so all the
+1's are accounted for. This means that the remaining cards cannot be
+1's. So the state of the game is
+
+> A has 11(not 1)(not 1)(not 1)  
+> B has 11(not 1)(not 1)  
+> C has (not 1)(not 1)(not 1)  
+
+Now it's C's turn. Note that since C does not have any 1's, she
+cannot ask for 1's.
+
+> **C:** A, do you have any 2's?  
+
+The state of the game is now
+
+> A has 11(not 1)(not 1)(not 1)  
+> B has 11(not 1)(not 1)  
+> C has 2(not 1)(not 1)  
+
+Suppose the answer is
+
+> **A:** No, I don't.  
+
+The state of the game is now
+
+> A has 11(not 1,2)(not 1,2)(not 1,2)  
+> B has 11(not 1)(not 1)  
+> C has 2(not 1)(not 1)  
+
+But there are only three suits, so as soon as a card is not a 1 or a 2,
+it must be a 3. Therefore, the state of the game is
+
+> A has 11333  
+> B has 11(not 1)(not 1)  
+> C has 2(not 1)(not 1)  
+
+But there are only four 3's total, so at least one of B's cards must
+be a 2. Similarly, at least one of C's undetermined cards must be a 2,
+so the state of the game is
+
+> A has 11333  
+> B has 112(not 1)  
+> C has 22(not 1)  
+
+We see that A's answer has really reduced the amount of uncertainty in
+the game! Now it's A's turn. Note that A has no 2's, so he cannot ask
+for 2's.
+
+> **A:** C, do you have any 3's?  
+
+Since we already knew that A had 3's, this question does not change the
+state of the game.
+
+> **C:** No, I don't.  
+
+This means that C's (not 1) is not a 3, so it must be a 2, which means
+that B's (not 1) must be a 3. So at the end of A's turn, the state of
+the game is
+
+> A has 11333  
+> B has 1123  
+> C has 222  
+
+Since all the hands are determined, **A wins**.
+
+# A physical deck for the game
+
+Quantum Go Fish is traditionally played by trying to keep track of the
+state of the game entirely mentally, often while inebriated. Though
+that's fun, I came up with a physical deck for playing the game which
+automatically does a lot of the bookkeeping for you, freeing your brain
+cycles up to strategize.
+
+The basic observation is that each player has some cards which are
+determined, and some which are not, and the cards which are undetermined
+are *undetermined in exactly the same way*. In other words, a hand might
+look like 1(2 or 3)(2 or 3)3, but it cannot look like 1(2 or 3)(1 or
+3)3.
+
+With this in mind, the physical deck for 6 players (you can replace 6 by
+$n$ if you wish) consists of 6 packets, each packet consists of
+
+-   6 cards numbered 1 through 6, and
+-   4 paperclips
+
+When the game starts, each player places the 6 cards face up in front of
+him, and has 4 paperclips in hand. **The paperclips represent the
+player's hand, and the cards represent the possible suits of the
+paperclips.** Read the previous sentence again. **When the suit of a
+paperclip becomes determined, you attach it to the card corresponding to
+its suit. When a player cannot have any paperclips of a given suit, he
+turns the card corresponding to that suit face down.**
+
+Suppose I ask a player for a 5. If there is a paperclip attached to my 5
+card, it means we already knew that I had a 5, so nothing changes. If I
+do not have a paperclip attached to my 5 card, I attach one of the
+paperclips I have in hand to the 5 card.
+
+Suppose another player asks me for a 5. If I have a paperclip attached
+to my 5 card, then I remove that paperclip from the card, give it to the
+other player, and she attaches it to her 5 card. If I do not have a
+paperclip attached to my 5 card (but I have at least one paperclip in
+hand), then I either
+
+-   say "yes, I have a 5," give one of my paperclips to the other
+    player, and she attaches it to her 5 card, or
+-   say "no" and turn my 5 card face down.
+
+Note that not all events (attaching a paperclip or turning a card face
+down) are triggered by a question or an answer. For example, in the
+sample game above, all the interesting deductions we were able to make
+after A said he didn't have any 2's would have to be worked out
+logically. If a player works something out, she announces it to the
+other players, paperclips are attached, cards are turned over, and the
+game continues.
