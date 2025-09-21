@@ -1,0 +1,35 @@
+---
+title: 'Bloom filters and fuzzy matching'
+description: 'A complete information game about hoarding uncertainty'
+pubDate: 2025-09-20
+heroImage: 'bloom_filter.svg'
+---
+
+Check out [Low-memory symbol indexing with Bloom
+filters](https://scalameta.org/metals/blog/2019/01/22/bloom-filters/), which
+talks about using [Bloom filters](https://en.wikipedia.org/wiki/Bloom_filter)
+for efficient algorithms for finding a given symbol in a code base, and for
+fuzzy search for symbols.
+
+The main point of the Bloom filter trick is that it gives a way to balance
+compute-at-index-time with compute-at-query-time. Shoving all symbol occurrences
+into one big hashmap makes queries fast, but if a file changes it might be a
+pain to update that hashmap. Having **no** index is the other extreme: file
+updates are cheap to deal with (because there's no index to update), but
+searching for a symbol requires reading all the files. Per-file or per-directory
+Bloom filters allow for a balance. For each file/directory, you have a bloom
+filter for all the symbols in the file. When a file changes, you only have to
+update *its* Bloom filter, and at query time you only have to read files whose
+Bloom filters say they're likely to contain the target symbol.
+
+The implementation of fuzzy search is another pretty trick in this article. You
+break each word into pieces in some prescribed way, and only bother checking
+files which contain all the pieces. This is very similar to how Bloom filters
+themselves are implemented. I like that this can actually *reduce* the number of
+entries in your Bloom filters. Naively you'd expect that you'd have to increase
+the the number of entries (to cover misspellings), but because your words are
+decomposed into components and you only read files which contain all the
+components, you only have to have "word components" in your index, which there
+aren't that many of. Pretty snazzy.
+
+image credit: [David Eppstein, Wikipedia](https://en.wikipedia.org/wiki/File:Bloom_filter.svg)
