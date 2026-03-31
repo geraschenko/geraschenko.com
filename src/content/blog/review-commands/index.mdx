@@ -20,7 +20,7 @@ review_done
 
 ## The idea
 
-`review_start "implemented XYZ"` does the following things:
+`review_start "implemented XYZ"` does three things:
 
 1. commits outstanding changes on your current branch,
 2. creates a temporary review branch,
@@ -32,22 +32,21 @@ The resulting history is roughly:
 
 ```text
 A ── B ── C ── D  (my-feature)
-          │
-          └───  (${USER}/review_in_progress working tree contains changes from D)
+          └────── (${USER}/review_in_progress), working tree contains changes from D
 ```
 
-Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in your IDE (Ctrl+Shift+G in VSCode). While reviewing, I often:
+Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in your IDE (Ctrl+Shift+G in VS Code). While reviewing, I often:
 
 - edit code directly,
 - leave inline temporary comments like `TDC: factor this out into a helper`,
 - ask questions like `TDC: why did you do X here?`
 
-![VSCode diff screenshot](diff_screenshot.png)
+![VS Code diff screenshot](diff_screenshot.png)
 
-When I'm done, I run `review_done`. That switches back to the original branch, deletes the temporary review branch, and creates a new commit containing only my review edits and comments:
+When I'm done, I run `review_done`. That switches back to the original branch, deletes the temporary review branch, and creates a new commit containing only my edits:
 
 ```text
-A ── B ── C ── D [original diff] ── E [my edits]   (my-feature)
+A ── B ── C ── D [agent snapshot] ── E [review feedback]   (my-feature)
 ```
 
 ## Why I like this
