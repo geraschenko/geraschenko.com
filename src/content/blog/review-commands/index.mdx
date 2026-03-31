@@ -1,0 +1,179 @@
+---
+title: 'Two shell commands for reviewing AI-generated code'
+description: 'A small Git workflow that snapshots an AI implementation, lets you review it in your editor, and hands your feedback back as a clean follow-up commit.'
+pubDate: 2026-03-31
+heroImage: 'review_flow.svg'
+---
+
+I often use an AI coding assistant to get to a first draft quickly, but I still want to do a real code review myself in my editor. I want the normal Git diff UI, I want to edit files directly, and I want the agent to see _exactly_ what I changed.
+
+These two shell functions give me that workflow:
+
+- `review_start`
+- `review_done`
+
+The helper script for this post lives alongside the article in my site repo as `review_aliases.sh`.
+
+## The idea
+
+Suppose an AI agent has just made a bunch of changes on your current branch.
+
+Run:
+
+```bash
+review_start "implemented XYZ"
+```
+
+This:
+
+1. commits the AI-generated changes on your current branch,
+2. creates a temporary review branch,
+3. resets that branch back one commit while keeping the changes in your working tree.
+
+So now you have the best of both worlds:
+
+- the AI's work is safely persisted as a real commit,
+- but in your editor it still looks like ordinary uncommitted changes.
+
+That means you can open VS Code (or any IDE), go to the Git changes view, and review the whole patch naturally.
+
+While reviewing, I often:
+
+- edit code directly,
+- rewrite parts I don't like,
+- leave temporary comments like `TDC: simplify this`,
+- add notes I want the AI to address.
+
+When I'm done, I run:
+
+```bash
+review_done
+```
+
+This switches back to the original branch, deletes the temporary review branch, and creates a new commit containing only my review edits and comments.
+
+Now the history looks like this:
+
+- **Commit D:** what the AI produced
+- **Commit E:** what I changed during review
+
+At that point I can tell the agent:
+
+```bash
+git show HEAD
+```
+
+and it can see exactly what I changed, without guessing and without clobbering my edits.
+
+## Why I like this
+
+The big win is that it turns “please address my review comments” into a concrete Git object.
+
+Instead of giving the agent a vague summary, I can hand it a precise follow-up commit containing:
+
+- the code I changed,
+- the comments I added,
+- the places I want rewritten,
+- and nothing else.
+
+That makes it much less likely that the agent misses feedback or reverts something I already fixed manually.
+
+## Installation
+
+Put `review_aliases.sh` somewhere in your dotfiles repo and source it from your `~/.bashrc`:
+
+```bash
+if [ -f "$HOME/path/to/dotfiles/review/review_aliases.sh" ]; then
+  . "$HOME/path/to/dotfiles/review/review_aliases.sh"
+fi
+```
+
+Then reload your shell:
+
+```bash
+source ~/.bashrc
+```
+
+## The workflow
+
+### 1. Let the AI make changes
+
+Start on your normal working branch and let the agent do its thing.
+
+### 2. Snapshot the AI result
+
+```bash
+review_start "implemented XYZ"
+```
+
+This creates a commit on your branch, then moves you to `${USER}/review_in_progress` with the same diff present as working-tree changes.
+
+### 3. Review in your editor
+
+Open the Git diff UI in your editor and review as usual.
+
+I use `TDC:` as a temporary marker for comments I want the AI to address later. By the end, there should be no `TDC:` left anywhere.
+
+### 4. Finish the review
+
+```bash
+review_done
+```
+
+This commits only the delta introduced during your review.
+
+### 5. Hand that commit back to the AI
+
+```bash
+git show HEAD
+```
+
+Now the agent can apply your feedback against a precise diff.
+
+## Example history
+
+Starting point:
+
+```text
+A -- B -- C   (my-feature)
+```
+
+After `review_start`:
+
+```text
+A -- B -- C -- D   (my-feature)
+             \
+              C    (${USER}/review_in_progress working tree contains changes from D)
+```
+
+After you review and run `review_done`:
+
+```text
+A -- B -- C -- D -- E   (my-feature)
+```
+
+Where:
+
+- `D` is the AI snapshot commit
+- `E` is your review feedback commit
+
+## Caveats
+
+A few important details:
+
+- The current version uses `git commit -am ...`, so it handles tracked modified/deleted files but not new untracked files. If the AI created new files, `git add` them first.
+- Only one review session can be active per repo.
+- `review_done` expects you to still be on the review branch.
+
+## The script
+
+The shell helpers used for this post are in `review_aliases.sh` next to this article in the repository.
+
+If you want the short version, it is just this:
+
+```bash
+review_start "implemented XYZ"
+# review in your editor
+review_done
+# then tell the AI: git show HEAD
+```
