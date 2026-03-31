@@ -10,19 +10,19 @@
   <circle cx="890" cy="310" r="20" fill="#1f2937" stroke="#f59e0b" stroke-width="6"/>
   <circle cx="890" cy="210" r="20" fill="#1f2937" stroke="#a78bfa" stroke-width="6" stroke-dasharray="6 8"/>
 
-  <g transform="rotate(-6 720 404)">
+  <rect x="740" y="110" width="300" height="42" rx="10" fill="#4c1d95"/>
+  <text x="890" y="137" fill="#f5f3ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" text-anchor="middle">${USER}/review_in_progress</text>
+
+  <g transform="rotate(90 875 262)">
+    <text x="875" y="262" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="42" font-weight="700" text-anchor="middle">=</text>
+  </g>
+
+  <g transform="rotate(-30 720 404)">
     <rect x="635" y="383" width="170" height="42" rx="10" fill="#14532d"/>
     <text x="720" y="410" fill="#dcfce7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" text-anchor="middle">AI snapshot</text>
   </g>
 
-  <g transform="rotate(-6 890 131)">
-    <rect x="740" y="110" width="300" height="42" rx="10" fill="#4c1d95"/>
-    <text x="890" y="137" fill="#f5f3ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" text-anchor="middle">${USER}/review_in_progress</text>
-  </g>
-
-  <text x="890" y="262" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="42" font-weight="700" text-anchor="middle">=</text>
-
-  <g transform="rotate(-6 890 404)">
+  <g transform="rotate(-30 890 404)">
     <rect x="785" y="383" width="210" height="42" rx="10" fill="#78350f"/>
     <text x="890" y="410" fill="#fef3c7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" text-anchor="middle">review feedback</text>
   </g>
