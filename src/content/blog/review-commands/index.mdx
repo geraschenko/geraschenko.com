@@ -1,18 +1,11 @@
 ---
-title: 'Two shell commands for reviewing AI-generated code'
+title: 'A workflow for reviewing AI-generated code'
 description: 'A small Git workflow that snapshots an AI implementation, lets you review it in your editor, and hands your feedback back as a clean follow-up commit.'
 pubDate: 2026-03-31
 heroImage: 'review_flow.svg'
 ---
 
-I often use an AI coding assistant to get to a first draft quickly, but I still want to do a real code review myself in my editor. I want the normal Git diff UI, I want to edit files directly, and I want the agent to see _exactly_ what I changed.
-
-These two shell functions give me that workflow:
-
-- `review_start`
-- `review_done`
-
-The helper script for this post lives alongside the article in my site repo as `review_aliases.sh`.
+I've been using two little shell functions to help me work efficiently with AI coding assistants: `review_start` and `review_done`. These allow me to see all changes made by the coding agent and leave inline comments/changes, but keep my changes _separate_ from the agents changes. This means that after a review pass, I can easily point the agent to just the stuff I changed.
 
 ## The idea
 
@@ -35,14 +28,13 @@ So now you have the best of both worlds:
 - the AI's work is safely persisted as a real commit,
 - but in your editor it still looks like ordinary uncommitted changes.
 
-That means you can open VS Code (or any IDE), go to the Git changes view, and review the whole patch naturally.
+That means you can open VS Code (or whatever IDE), go to the Git changes view, and review the whole patch naturally.
 
 While reviewing, I often:
 
 - edit code directly,
-- rewrite parts I don't like,
-- leave temporary comments like `TDC: simplify this`,
-- add notes I want the AI to address.
+- leave inline temporary comments like `TDC: factor this out into a helper` for the AI to address.
+- ask questions like `TDC: why did you do X here?`
 
 When I'm done, I run:
 
@@ -54,6 +46,7 @@ This switches back to the original branch, deletes the temporary review branch, 
 
 Now the history looks like this:
 
+TDC: this is not very clear, and the names "D" and "E" look like they came out of nowhere. Maybe we should have something that looks like git log --one-line --graph here?
 - **Commit D:** what the AI produced
 - **Commit E:** what I changed during review
 
@@ -67,24 +60,20 @@ and it can see exactly what I changed, without guessing and without clobbering m
 
 ## Why I like this
 
-The big win is that it turns “please address my review comments” into a concrete Git object.
+The big win is that it turns “please address my review comments” into a concrete Git object that I can hand to the agent.
 
-Instead of giving the agent a vague summary, I can hand it a precise follow-up commit containing:
-
-- the code I changed,
-- the comments I added,
-- the places I want rewritten,
-- and nothing else.
-
-That makes it much less likely that the agent misses feedback or reverts something I already fixed manually.
+* All the requests for changes are right next to the code I was looking at when I left the request. 
+* It's aware of things I changed so it doesn't revert my manual fixes.
+* All this takes a single conversational turn with the agent, so it's much more token-efficient than providing the comments/requests one at a time.
+* I don't get confused about what I have or haven't already reviewed. (But the flip side is that I *have* to do a full review pass before running `review_done`)
 
 ## Installation
 
 Put `review_aliases.sh` somewhere in your dotfiles repo and source it from your `~/.bashrc`:
 
 ```bash
-if [ -f "$HOME/path/to/dotfiles/review/review_aliases.sh" ]; then
-  . "$HOME/path/to/dotfiles/review/review_aliases.sh"
+if [ -f "$HOME/path/to/review_aliases.sh" ]; then
+  . "$HOME/path/to/review_aliases.sh"
 fi
 ```
 
@@ -131,6 +120,7 @@ git show HEAD
 Now the agent can apply your feedback against a precise diff.
 
 ## Example history
+TDC: I think this example history should be in the "idea" section above. This is kind of repetitive. I think we re-summarize the idea 3-4 times in this short file!
 
 Starting point:
 
