@@ -1,6 +1,6 @@
 ---
-title: 'A workflow for reviewing AI-generated code'
-description: 'A small Git workflow that snapshots an AI implementation, lets you review it in your editor, and hands your feedback back as a clean follow-up commit.'
+title: 'A workflow for reviewing agent code'
+description: 'A small Git workflow that snapshots agent code, lets you review it in your editor, and hands your feedback back as a clean follow-up commit.'
 pubDate: 2026-03-31
 heroImage: 'review_flow.svg'
 ---
@@ -28,12 +28,12 @@ So the AI's work is persisted as a real commit, but in your editor it still look
 The resulting history is roughly:
 
 ```text
-A -- B -- C -- D   (my-feature)
-           \
-            C    (${USER}/review_in_progress working tree contains changes from D)
+A ── B ── C ── D  (my-feature)
+          │
+          └───  (${USER}/review_in_progress working tree contains changes from D)
 ```
 
-Here `D` is the AI snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in VS Code or any other IDE.
+Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in VS Code or any other IDE.
 
 While reviewing, I often:
 
@@ -50,7 +50,7 @@ review_done
 That switches back to the original branch, deletes the temporary review branch, and creates a new commit containing only my review edits and comments:
 
 ```text
-A -- B -- C -- D -- E   (my-feature)
+A ── B ── C ── D ── E   (my-feature)
 ```
 
 Now `E` is a precise “please address this review” commit. I can just tell the agent:
@@ -88,11 +88,11 @@ source ~/.bashrc
 
 ## The workflow
 
-### 1. Let the AI make changes
+### 1. Let the agent make changes
 
 Start on your normal working branch and let the agent do its thing.
 
-### 2. Snapshot the AI result
+### 2. Snapshot the agent result
 
 ```bash
 review_start "implemented XYZ"
@@ -104,7 +104,7 @@ This creates a commit on your branch, then moves you to `${USER}/review_in_progr
 
 Open the Git diff UI in your editor and review as usual.
 
-I use `TDC:` as a temporary marker for comments I want the AI to address later. By the end, there should be no `TDC:` left anywhere.
+I use `TDC:` as a temporary marker for comments I want the agent to address later. By the end, there should be no `TDC:` left anywhere.
 
 ### 4. Finish the review
 
@@ -114,7 +114,7 @@ review_done
 
 This commits only the delta introduced during your review.
 
-### 5. Hand that commit back to the AI
+### 5. Hand that commit back to the agent
 
 ```bash
 git show HEAD
@@ -126,14 +126,15 @@ Now the agent can apply your feedback against a precise diff.
 
 A few important details:
 
-- The current version uses `git commit -am ...`, so it handles tracked modified/deleted files but not new untracked files. If the AI created new files, `git add` them first.
+- The current version uses `git commit -am ...`, so it handles tracked modified/deleted files but not new untracked files. If the agent created new files, `git add` them first.
 - Only one review session can be active per repo.
 - `review_done` expects you to still be on the review branch.
 
 ## The script
 
-TDC: let's put the file in public/files/ so they can download it directly instead of going to github.
-The shell helpers used for this post are in `review_aliases.sh` next to this article in the repository.
+You can download the shell helpers directly here:
+
+- [`review_aliases.sh`](/files/review_aliases.sh)
 
 ## TL;DR
 
@@ -141,5 +142,5 @@ The shell helpers used for this post are in `review_aliases.sh` next to this art
 review_start "implemented XYZ"
 # review in your editor
 review_done
-# then tell the AI: git show HEAD
+# then tell the agent to run: git show HEAD
 ```
