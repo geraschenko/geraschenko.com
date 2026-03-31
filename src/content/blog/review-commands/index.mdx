@@ -9,21 +9,25 @@ I've been using two little shell functions to help me work with AI coding assist
 
 They let me do a full review pass in my editor, leave inline comments and fixes, and then hand the agent a commit containing only my feedback.
 
-## The idea
-
-Suppose an AI agent has just made a bunch of changes on your current branch. Run:
+## TL;DR
+Add `review_start` and `review_done` to your `~/.bashrc` (see Installation below), then use this workflow:
 
 ```bash
 review_start "implemented XYZ"
+# Review in your editor, making whatever changes you like
+review_done
+# Tell the agent to run `git show HEAD`. It will see just *your* changes.
 ```
 
-This:
+## The idea
 
-1. commits the AI-generated changes on your current branch,
+`review_start "implemented XYZ"` does the following things:
+
+1. commits the agent-generated changes on your current branch,
 2. creates a temporary review branch,
 3. resets that branch back one commit while keeping the changes in your working tree.
 
-So the AI's work is persisted as a real commit, but in your editor it still looks like ordinary uncommitted changes.
+So the agent's work is persisted as a commit, but in your editor it still looks like ordinary uncommitted changes.
 
 The resulting history is roughly:
 
@@ -33,13 +37,15 @@ A ── B ── C ── D  (my-feature)
           └───  (${USER}/review_in_progress working tree contains changes from D)
 ```
 
-Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in VS Code or any other IDE.
+Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in your IDE (Ctrl+Shift+G in VSCode).
 
 While reviewing, I often:
 
 - edit code directly,
 - leave inline temporary comments like `TDC: factor this out into a helper`,
 - ask questions like `TDC: why did you do X here?`
+
+![VSCode diff screenshot](diff_screenshot.png)
 
 When I'm done, I run:
 
@@ -72,7 +78,7 @@ The big win is that it turns “please address my review comments” into a conc
 
 ## Installation
 
-Put `review_aliases.sh` somewhere in your dotfiles repo and source it from your `~/.bashrc`:
+Put the contents of [`review_aliases.sh`](/files/review_aliases.sh) in your `~/.bashrc`, or include it like this:
 
 ```bash
 if [ -f "$HOME/path/to/review_aliases.sh" ]; then
@@ -86,42 +92,6 @@ Then reload your shell:
 source ~/.bashrc
 ```
 
-## The workflow
-
-### 1. Let the agent make changes
-
-Start on your normal working branch and let the agent do its thing.
-
-### 2. Snapshot the agent result
-
-```bash
-review_start "implemented XYZ"
-```
-
-This creates a commit on your branch, then moves you to `${USER}/review_in_progress` with the same diff present as working-tree changes.
-
-### 3. Review in your editor
-
-Open the Git diff UI in your editor and review as usual.
-
-I use `TDC:` as a temporary marker for comments I want the agent to address later. By the end, there should be no `TDC:` left anywhere.
-
-### 4. Finish the review
-
-```bash
-review_done
-```
-
-This commits only the delta introduced during your review.
-
-### 5. Hand that commit back to the agent
-
-```bash
-git show HEAD
-```
-
-Now the agent can apply your feedback against a precise diff.
-
 ## Caveats
 
 A few important details:
@@ -129,18 +99,3 @@ A few important details:
 - The current version uses `git commit -am ...`, so it handles tracked modified/deleted files but not new untracked files. If the agent created new files, `git add` them first.
 - Only one review session can be active per repo.
 - `review_done` expects you to still be on the review branch.
-
-## The script
-
-You can download the shell helpers directly here:
-
-- [`review_aliases.sh`](/files/review_aliases.sh)
-
-## TL;DR
-
-```bash
-review_start "implemented XYZ"
-# review in your editor
-review_done
-# then tell the agent to run: git show HEAD
-```
