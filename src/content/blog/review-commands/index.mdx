@@ -5,14 +5,13 @@ pubDate: 2026-03-31
 heroImage: 'review_flow.svg'
 ---
 
-I've been using two little shell functions to help me work with AI coding assistants: `review_start` and `review_done`.
-
-They let me do a full review pass in my editor, leave inline comments and fixes, and then hand the agent a commit containing only my feedback.
+I've been using two little shell functions to help me work with AI coding assistants: `review_start` and `review_done`. They let me do a full review pass in my editor, leave inline comments and fixes, and then hand the agent a commit containing _just_ my feedback.
 
 ## TL;DR
-Add `review_start` and `review_done` to your `~/.bashrc` (see Installation below), then use this workflow:
+Add `review_start` and `review_done` to your `~/.bashrc` (see [below](#installation)), then use this workflow:
 
 ```bash
+# Have the agent implement feature XYZ
 review_start "implemented XYZ"
 # Review in your editor, making whatever changes you like
 review_done
@@ -23,7 +22,7 @@ review_done
 
 `review_start "implemented XYZ"` does the following things:
 
-1. commits the agent-generated changes on your current branch,
+1. commits outstanding changes on your current branch,
 2. creates a temporary review branch,
 3. resets that branch back one commit while keeping the changes in your working tree.
 
@@ -37,9 +36,7 @@ A ── B ── C ── D  (my-feature)
           └───  (${USER}/review_in_progress working tree contains changes from D)
 ```
 
-Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in your IDE (Ctrl+Shift+G in VSCode).
-
-While reviewing, I often:
+Here `D` is the snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in your IDE (Ctrl+Shift+G in VSCode). While reviewing, I often:
 
 - edit code directly,
 - leave inline temporary comments like `TDC: factor this out into a helper`,
@@ -47,25 +44,11 @@ While reviewing, I often:
 
 ![VSCode diff screenshot](diff_screenshot.png)
 
-When I'm done, I run:
-
-```bash
-review_done
-```
-
-That switches back to the original branch, deletes the temporary review branch, and creates a new commit containing only my review edits and comments:
+When I'm done, I run `review_done`. That switches back to the original branch, deletes the temporary review branch, and creates a new commit containing only my review edits and comments:
 
 ```text
-A ── B ── C ── D ── E   (my-feature)
+A ── B ── C ── D [original diff] ── E [my edits]   (my-feature)
 ```
-
-Now `E` is a precise “please address this review” commit. I can just tell the agent:
-
-```bash
-git show HEAD
-```
-
-and it can see exactly what I changed, without guessing and without clobbering my edits.
 
 ## Why I like this
 
@@ -73,16 +56,16 @@ The big win is that it turns “please address my review comments” into a conc
 
 - My requests are right next to the code I was looking at when I made the request.
 - The agent can see what I already changed, so it is less likely to revert my manual fixes.
-- It is token-efficient: I can hand over one commit instead of dribbling out comments one at a time.
-- I do one deliberate review pass instead of losing track of what I've already looked at.
+- It is token-efficient: I can supply the review commit in a single conversational turn instead of dribbling out comments one at a time.
+- I don't lose track of what I've already looked at, and the code doesn't change under my feet while I'm reviewing it.
 
 ## Installation
 
 Put the contents of [`review_aliases.sh`](/files/review_aliases.sh) in your `~/.bashrc`, or include it like this:
 
 ```bash
-if [ -f "$HOME/path/to/review_aliases.sh" ]; then
-  . "$HOME/path/to/review_aliases.sh"
+if [ -f "/path/to/review_aliases.sh" ]; then
+  . "/path/to/review_aliases.sh"
 fi
 ```
 
