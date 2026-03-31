@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="120 50 850 460" fill="none">
+  <line x1="120" y1="310" x2="198" y2="310" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt"/>
+  <line x1="242" y1="310" x2="368" y2="310" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt"/>
+  <line x1="412" y1="310" x2="538" y2="310" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt"/>
+  <line x1="582" y1="310" x2="698" y2="310" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt"/>
+  <line x1="742" y1="310" x2="868" y2="310" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt"/>
+  <line x1="912" y1="310" x2="970" y2="310" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt"/>
+  <path d="M 578 297 L 700 210 L 868 210" stroke="#cbd5e1" stroke-width="8" stroke-linecap="butt" stroke-linejoin="round" fill="none"/>
+
+  <circle cx="220" cy="310" r="20" fill="none" stroke="#60a5fa" stroke-width="6"/>
+  <circle cx="390" cy="310" r="20" fill="none" stroke="#60a5fa" stroke-width="6"/>
+  <circle cx="560" cy="310" r="20" fill="none" stroke="#60a5fa" stroke-width="6"/>
+
+  <circle cx="890" cy="210" r="20" fill="none" stroke="#a78bfa" stroke-width="6" stroke-dasharray="6 8"/>
+  <g transform="translate(890 180) rotate(10)">
+    <rect x="-300" y="-42" width="300" height="42" rx="10" fill="#ddd6fe"/>
+    <text x="-150" y="-21" fill="#4c1d95" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" text-anchor="middle" dominant-baseline="middle">${USER}/review_in_progress</text>
+  </g>
+
+  <g transform="translate(887 260) rotate(90)">
+    <text x="0" y="0" fill="#475569" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="42" font-weight="700" text-anchor="middle" dominant-baseline="middle">=</text>
+  </g>
+
+  <circle cx="720" cy="310" r="20" fill="none" stroke="#22c55e" stroke-width="6"/>
+  <g transform="translate(720 340) rotate(-20)">
+    <rect x="-175" y="0" width="180" height="42" rx="10" fill="#bbf7d0"/>
+    <text x="-85" y="21" fill="#14532d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" text-anchor="middle" dominant-baseline="middle">agent snapshot</text>
+  </g>
+
+  <circle cx="890" cy="310" r="20" fill="none" stroke="#f59e0b" stroke-width="6"/>
+  <g transform="translate(890 340) rotate(-20)">
+    <rect x="-210" y="0" width="210" height="42" rx="10" fill="#fed7aa"/>
+    <text x="-105" y="21" fill="#9a3412" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" text-anchor="middle" dominant-baseline="middle">review feedback</text>
+  </g>
+</svg>
