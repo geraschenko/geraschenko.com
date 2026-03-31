@@ -23,14 +23,14 @@ This:
 2. creates a temporary review branch,
 3. resets that branch back one commit while keeping the changes in your working tree.
 
-So the AI's work is safely persisted as a real commit, but in your editor it still looks like ordinary uncommitted changes.
+So the AI's work is persisted as a real commit, but in your editor it still looks like ordinary uncommitted changes.
 
 The resulting history is roughly:
 
 ```text
 A -- B -- C -- D   (my-feature)
-             \
-              C    (${USER}/review_in_progress working tree contains changes from D)
+           \
+            C    (${USER}/review_in_progress working tree contains changes from D)
 ```
 
 Here `D` is the AI snapshot commit. The review branch points at `C`, but your working tree still contains the diff from `D`, so you can review it naturally in VS Code or any other IDE.
@@ -65,7 +65,7 @@ and it can see exactly what I changed, without guessing and without clobbering m
 
 The big win is that it turns “please address my review comments” into a concrete Git object.
 
-- My requests are right next to the code I was looking at.
+- My requests are right next to the code I was looking at when I made the request.
 - The agent can see what I already changed, so it is less likely to revert my manual fixes.
 - It is token-efficient: I can hand over one commit instead of dribbling out comments one at a time.
 - I do one deliberate review pass instead of losing track of what I've already looked at.
@@ -132,9 +132,10 @@ A few important details:
 
 ## The script
 
+TDC: let's put the file in public/files/ so they can download it directly instead of going to github.
 The shell helpers used for this post are in `review_aliases.sh` next to this article in the repository.
 
-Short version:
+## TL;DR
 
 ```bash
 review_start "implemented XYZ"
