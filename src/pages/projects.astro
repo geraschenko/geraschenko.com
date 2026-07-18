@@ -1,0 +1,81 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import FormattedDate from "../components/FormattedDate.astro";
+
+const projects: CollectionEntry<"projects">[] = (
+	await getCollection("projects")
+).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const rendered = await Promise.all(
+	projects.map(async (project) => ({
+		project,
+		Content: (await render(project)).Content,
+	})),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			ul {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+			}
+			li {
+				margin-bottom: 2rem;
+			}
+			.header {
+				display: flex;
+				align-items: baseline;
+				gap: 0.75rem;
+			}
+			.title {
+				margin: 0;
+			}
+			.date {
+				margin: 0;
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+			}
+			.description {
+				margin: 0.25rem 0 0;
+			}
+			.description :global(p) {
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section>
+				<ul>
+					{
+						rendered.map(({ project, Content }) => (
+							<li>
+								<div class="header">
+									<h4 class="title">
+										<a href={project.data.url}>
+											{project.data.title}
+										</a>
+									</h4>
+								</div>
+								<div class="description">
+									<Content />
+								</div>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
