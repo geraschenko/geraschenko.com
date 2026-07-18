@@ -1,8 +1,11 @@
 ---
+import { Image } from "astro:assets";
 import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import { Content as Home } from "../content/home.md";
+import antonHeadshot from "../assets/Anton.jpg";
 ---
 
 <!doctype html>
@@ -19,7 +22,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 				}
 			}
 
-			.scaled-image {
+			:global(.scaled-image) {
 				height: 1.5em;
 				border-radius: 0px;
 				margin-bottom: -0.4em;
@@ -34,53 +37,9 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 		<Header />
 		<main>
 			<figure class="headshot">
-				<img src="img/Anton.jpg" alt="Anton" />
+				<Image src={antonHeadshot} alt="Anton" />
 			</figure>
-			<p>
-				I'm Anton Geraschenko. I'm a mathematician and software engineer.
-				I've worked/studied at Google, Plasmidsaurus, Eonite Perception, Caltech,
-				UC Berkeley, and Brandeis.
-			</p>
-			<p>
-				Lately I've been thinking about agentic coding, particularly (a)
-				task-vs-agent duality in how people orchestrate agents, (b)
-				strategies for incremental migration of workflows
-				human-to-agent-to-code, and (c) harness features to reduce
-				cognitive load on the agent. I really like <a
-				href="https://pi.dev/">pi</a> and wrote <a
-				href="https://github.com/geraschenko/pictl">pictl</a> to
-				experiment with some of these "expand the harness" ideas.
-			</p>
-			<p>
-				I'm also interested in probability, information theory, and
-				reinforcement learning. Some of my public-facing projects
-				include using millions of phones <a
-				href="https://www.nature.com/articles/s41586-024-08072-x">to map
-				the ionosphere</a> and using differentiable programming and
-				monte carlo sampling to <a
-				href="https://github.com/verilylifesciences/site-selection-tool">design
-				clinical trials</a>.
-			</p>
-			<p>
-				When I was in academia, my mathematical interests were largely
-				in algebraic geometry, particularly foundational questions about
-				algebraic stacks. I founded
-				<a href="https://mathoverflow.net"><img src="img/MOlogo.svg" alt="MathOverflow" class="scaled-image" /></a>,
-				and helped make it successful.
-			</p>
-			<p>
-				If you're looking for my old <a
-				href="https://stacky.net/wiki/index.php?title=Course_notes">course
-				notes</a> or <a
-				href="https://stacky.net/wiki/index.php?title=Category:Blog">blog
-				posts</a>, you can find them at my old wiki <a
-				href="https://stacky.net">stacky.net</a>. I'll
-				probably move most of that stuff here eventually.
-			</p>
-			<p>
-				You can email me at <a
-				href="mailto:geraschenko@gmail.com">geraschenko@gmail.com</a>.
-			</p>
+			<Home />
 		</main>
 		<Footer />
 	</body>
