@@ -1,0 +1,68 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+interface Props {
+	series: string;
+}
+const { series } = Astro.props;
+
+const inSeries = (await getCollection("blog")).filter(
+	(p) => p.data.series === series,
+);
+const overview = inSeries.find((p) => p.data.seriesOverview);
+const installments = inSeries
+	.filter((p) => !p.data.seriesOverview)
+	.sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+
+const path = (post: CollectionEntry<"blog">) => `/blog/${post.id}/`;
+const current = Astro.url.pathname;
+---
+
+<nav class="series-toc" aria-label="Series contents">
+	{
+		overview && (
+			path(overview) === current ? (
+				<span aria-current="page" class="series-home">{overview.data.title}</span>
+			) : (
+				<a class="series-home" href={path(overview)}>{overview.data.title}</a>
+			)
+		)
+	}
+	<ol>
+		{
+			installments.map((post) => (
+				<li>
+					{path(post) === current ? (
+						<span aria-current="page">{post.data.title}</span>
+					) : (
+						<a href={path(post)}>{post.data.title}</a>
+					)}
+				</li>
+			))
+		}
+	</ol>
+</nav>
+
+<style>
+	.series-toc {
+		margin: 1.5em 0;
+		padding: 1em 1.5em;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 12px;
+		background: rgb(var(--gray-light), 0.25);
+	}
+	.series-home {
+		font-weight: bold;
+	}
+	.series-toc ol {
+		margin: 0.5em 0 0;
+		padding-left: 1.5em;
+	}
+	.series-toc li {
+		margin: 0.25em 0;
+	}
+	.series-toc [aria-current="page"] {
+		font-weight: bold;
+		color: rgb(var(--gray));
+	}
+</style>

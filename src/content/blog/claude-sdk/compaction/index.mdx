@@ -1,0 +1,193 @@
+---
+title: 'Controlling the context window: compaction and friends'
+description: 'A compact reference for transcript relinking in Claude Code.'
+pubDate: 2026-07-22
+series: 'claude-sdk'
+---
+import SeriesTOC from '@components/SeriesTOC.astro';
+
+<SeriesTOC series="claude-sdk" />
+
+If you're like me, you want fine control over Claude's context window. Maybe
+you've even experimented with aggressive forking or surgery on JSONL session
+files. If so, this post is for you.
+
+Claude offers `/compact`, and hitting Esc-Esc and navigating a few turns back
+in the conversation offers two more summarization options:
+
+- **Summarize up to here** replaces the earlier conversation with a summary and
+  leaves the newer messages intact.
+- **Summarize from here** leaves the earlier conversation intact and replaces
+  the newer messages with a summary. There is also **Restore conversation**,
+  which is basically this option without a summary.
+
+All of these operations stay within one session file. The file is an append-only
+tree: most entries have a `uuid` and a `parentUuid`. Compaction appends a special
+system entry called a `compact_boundary`. When Claude Code loads the session,
+the boundary entry tells it how to rejigger the tree to construct Claude's
+context.
+
+The SDK provides no supported way to insert a boundary yourself. But you can
+stop a Query, append a hand-crafted boundary to its session file, and resume the
+same session. That gives you a powerful primitive: **replace Claude's
+conversational context with any ordered list of messages from the session** —
+keep only the messages that matter, splice in your own summary before or after
+them, resurrect messages from an abandoned branch, or empty the context
+entirely.
+
+## Relinking: How the context window is built
+
+The assistant context window is determined by the last `compact_boundary` in the
+session file. The only part of a boundary we need to care about is
+`preservedMessages`:
+
+```json
+{
+  "type": "system",
+  "subtype": "compact_boundary",
+  "uuid": "B",
+  "compactMetadata": {
+    "preservedMessages": {
+      "anchorUuid": "<summary-or-boundary-uuid>",
+      "uuids": ["3", "4"]
+    }
+  }
+}
+```
+
+`uuids` is an ordered list of earlier session entries to preserve.  `anchorUuid`
+is either the boundary itself or a summary message appended after the boundary.
+
+To construct the assistant's context window, the loader takes the most recent
+boundary and constructs this chain:
+
+```text
+anchor → preserved uuids → child of anchor → subsequent messages
+```
+
+In other words:
+
+1. Reparent the preserved entries immediately after the anchor, in the order listed.
+2. Reparent the child of the anchor message (if any) after the end of the preserved list.
+3. Discard older entries that were not preserved.
+
+That's it. The boundary does not change the original entries in the JSONL; the
+loader relinks them in memory, which is why a later boundary can recover entries
+cut by an earlier one. The boundary message itself has no text body and does not
+appear in the assistant context.
+
+The chain is recomputed on every load, so "the child of the anchor" means
+whatever the anchor's child is at load time. Entries appended after the boundary
+is written — a summary, or the next user turn — become the anchor's child and
+slot in after the preserved list. This is why both summary placements below fall
+out of the same rule, and why a synthetic boundary composes cleanly with
+whatever conversation follows it.
+
+A boundary may preserve **any ordered selection of entries**, not just an existing
+branch of the session tree.
+
+## Examples
+
+`/compact`, "up to," "from," empty context, and `set-context` are all just
+different choices of anchor and preserved messages.
+
+### `/compact` and "Summarize up to here": summary first
+
+A summary is an ordinary user message appended after the boundary. For
+`/compact`, the summary is the anchor, and Claude Code preserves the final
+assistant API response (sometimes spread across multiple entries) before the
+compaction. For example, if your conversation so far is `1 → 2 → 3 → 4` and you
+`/compact`, the session will get a boundary message that looks like this:
+
+```text
+preservedMessages:
+  anchorUuid: S
+  uuids: [4]
+```
+
+and a summary message, which I'll call `S`, which the next message `5` will be a
+child of. The TUI shows you something like
+
+```text
+1 → 2 → 3 → 4 → [compacted] → S → 5
+```
+
+which may lead you to believe that `S → 5` is what's in context, but in fact
+relinking keeps the last couple of messages and puts the summary _before_ them:
+
+```text
+S → 4 → 5
+```
+
+**Summarize up to here** uses the same shape. The summary is the anchor, and
+`uuids` contains all the messages after the chosen point.
+
+### "Summarize from here": recent summary last
+
+If your conversation so far is `1 → 2 → 3 → 4` and you navigate back to `2` and
+"Summarize from here", the session will get a boundary message that looks like
+this:
+
+```text
+preservedMessages:
+  anchorUuid: B    // this boundary's uuid
+  uuids: [1, 2]
+```
+
+and a summary message, which I'll call `T`, whose parent is `B`, and which the
+next message `5` will be a child of. Relinking puts the preserved entries after
+`B` and moves `T` (`B`'s child) after them:
+
+```text
+B → 1 → 2 → T → 5
+```
+
+There is no special "from" algorithm and no special summary placement rule. The
+summary is put at the end of the preserved list simply because it was the child
+of the anchor and got moved after the preserved list.
+
+### A general-purpose `set-context`
+
+Once you understand boundaries as splices, `set-context` is straightforward:
+
+1. Wait for the current assistant response to appear in the session file.
+2. End the Query's input stream and wait for the Query to shut down.
+3. Append a boundary containing the UUIDs you want Claude to see.
+4. If desired, append your own summary message as a child of the boundary.
+5. Resume the same session in a new Query.
+
+Choose the boundary's `anchorUuid` based on where the summary belongs:
+
+```text
+summary then selected messages:  anchor = summary
+selected messages then summary:  anchor = boundary
+selected messages, no summary:   anchor = boundary; omit summary
+empty conversational context:    uuids = []; omit summary
+```
+
+## Gotchas, Caveats, Notes, and Tips
+
+- The loader silently sanitizes the result before sending it to the API. For
+  example, if you preserve a tool call but omit its result, the orphaned tool
+  call is dropped. So if you want to preserve tool calls and responses, be
+  careful to include both in the preserved message list.
+- If `uuids` contains duplicates, or references entries that don't appear
+  earlier in the file, relinking is silently skipped and the boundary behaves as
+  if `uuids` were empty.
+- The set-context recipe changes conversation history only. It can't change the
+  system prompt, tools, MCP servers, permissions, or filesystem state.
+- The session file may lag behind the SDK's `result` event by ~100ms. In step 1
+  of the set-context recipe, make sure it's actually flushed before shutting
+  down your Query (e.g. poll the file on change until the result uuid is
+  present).
+- In native `/compact`, the relinked conversation ends with a user-role summary,
+  so Claude Code inserts an assistant message saying "No response requested."
+  before accepting the next user turn. Native compaction may separately
+  re-inject recent tool calls and results as `<system-reminder>` text. A
+  synthetic boundary does not get that behavior for free.
+- This recipe is hacking internals and may break in the future. It was tested on
+  Claude Agent SDK **0.3.195**, whose bundled Claude Code CLI is **2.1.195**.
+- If you just want to rewind to a message _in active context_, you don't need
+  to insert a boundary at all. You can just restart your Query and set the
+  `resumeSessionAt` option to point to the target message. However, if you want
+  to rewind to a message no longer in context, you have to insert a boundary entry.

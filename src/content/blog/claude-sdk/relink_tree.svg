@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <!-- left: session tree (clauctl-style) -->
+  <!-- trunk -->
+  <line x1="160" y1="106" x2="160" y2="134" stroke="#cbd5e1" stroke-width="5"/>
+  <line x1="160" y1="166" x2="160" y2="430" stroke="#cbd5e1" stroke-width="5"/>
+  <!-- elbow to first branch -->
+  <line x1="160" y1="210" x2="244" y2="210" stroke="#cbd5e1" stroke-width="5"/>
+  <!-- elbow to second branch (abandoned) -->
+  <line x1="160" y1="430" x2="244" y2="430" stroke="#cbd5e1" stroke-width="5" opacity="0.45"/>
+  <!-- first branch spine -->
+  <line x1="260" y1="226" x2="260" y2="254" stroke="#cbd5e1" stroke-width="5"/>
+  <line x1="260" y1="286" x2="260" y2="314" stroke="#cbd5e1" stroke-width="5"/>
+  <!-- second branch spine (abandoned) -->
+  <line x1="260" y1="446" x2="260" y2="474" stroke="#cbd5e1" stroke-width="5" opacity="0.45"/>
+  <line x1="260" y1="506" x2="260" y2="534" stroke="#cbd5e1" stroke-width="5" opacity="0.45"/>
+
+  <!-- tree nodes with faux-text bars -->
+  <circle cx="160" cy="90" r="14" fill="none" stroke="#94a3b8" stroke-width="5"/>
+  <rect x="194" y="83" width="140" height="14" rx="7" fill="#e2e8f0"/>
+
+  <circle cx="160" cy="150" r="14" fill="none" stroke="#60a5fa" stroke-width="5"/>
+  <rect x="194" y="143" width="170" height="14" rx="7" fill="#e2e8f0"/>
+
+  <circle cx="260" cy="210" r="14" fill="none" stroke="#94a3b8" stroke-width="5"/>
+  <rect x="294" y="203" width="120" height="14" rx="7" fill="#e2e8f0"/>
+
+  <circle cx="260" cy="270" r="14" fill="none" stroke="#22c55e" stroke-width="5"/>
+  <rect x="294" y="263" width="150" height="14" rx="7" fill="#e2e8f0"/>
+
+  <!-- compaction marker, as in the tree view -->
+  <rect x="242" y="316" width="140" height="30" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="312" y="332" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" text-anchor="middle" dominant-baseline="middle">[compacted]</text>
+
+  <g opacity="0.45">
+    <circle cx="260" cy="430" r="14" fill="none" stroke="#94a3b8" stroke-width="5"/>
+    <rect x="294" y="423" width="130" height="14" rx="7" fill="#e2e8f0"/>
+  </g>
+
+  <circle cx="260" cy="490" r="14" fill="none" stroke="#f59e0b" stroke-width="5"/>
+  <rect x="294" y="483" width="160" height="14" rx="7" fill="#e2e8f0"/>
+
+  <g opacity="0.45">
+    <circle cx="260" cy="550" r="14" fill="none" stroke="#94a3b8" stroke-width="5"/>
+    <rect x="294" y="543" width="110" height="14" rx="7" fill="#e2e8f0"/>
+  </g>
+
+  <!-- relink curves: picked nodes fly to the chain -->
+  <path d="M 380 150 C 560 150, 660 260, 858 260" stroke="#60a5fa" stroke-width="3" stroke-dasharray="5 8" opacity="0.7" fill="none"/>
+  <path d="M 460 270 C 610 270, 690 350, 858 350" stroke="#22c55e" stroke-width="3" stroke-dasharray="5 8" opacity="0.7" fill="none"/>
+  <path d="M 470 490 C 630 490, 700 440, 858 440" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5 8" opacity="0.7" fill="none"/>
+
+  <!-- right: relinked context chain -->
+  <line x1="880" y1="186" x2="880" y2="244" stroke="#cbd5e1" stroke-width="5"/>
+  <line x1="880" y1="276" x2="880" y2="334" stroke="#cbd5e1" stroke-width="5"/>
+  <line x1="880" y1="366" x2="880" y2="424" stroke="#cbd5e1" stroke-width="5"/>
+
+  <!-- anchor: synthetic boundary -->
+  <circle cx="880" cy="170" r="14" fill="none" stroke="#a78bfa" stroke-width="5" stroke-dasharray="6 8"/>
+  <g>
+    <rect x="914" y="153" width="240" height="34" rx="10" fill="#ddd6fe"/>
+    <text x="1034" y="170" fill="#4c1d95" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" text-anchor="middle" dominant-baseline="middle">compact_boundary</text>
+  </g>
+
+  <circle cx="880" cy="260" r="14" fill="none" stroke="#60a5fa" stroke-width="5"/>
+  <rect x="914" y="253" width="170" height="14" rx="7" fill="#e2e8f0"/>
+
+  <circle cx="880" cy="350" r="14" fill="none" stroke="#22c55e" stroke-width="5"/>
+  <rect x="914" y="343" width="150" height="14" rx="7" fill="#e2e8f0"/>
+
+  <circle cx="880" cy="440" r="14" fill="none" stroke="#f59e0b" stroke-width="5"/>
+  <rect x="914" y="433" width="160" height="14" rx="7" fill="#e2e8f0"/>
+</svg>

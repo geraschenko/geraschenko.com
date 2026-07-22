@@ -12,6 +12,10 @@ const blog = defineCollection({
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		heroImage: image().optional(),
+		// Slug of the series this post belongs to, if any.
+		series: z.string().optional(),
+		// Marks the post as its series' overview/home page.
+		seriesOverview: z.boolean().optional(),
 	}),
 });
 
