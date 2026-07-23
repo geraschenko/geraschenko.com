@@ -2,9 +2,11 @@
 title: 'Controlling the context window: compaction and friends'
 description: 'A compact reference for transcript relinking in Claude Code.'
 pubDate: 2026-07-22
+heroImage: '../relink_tree.svg'
 series: 'claude-sdk'
 ---
 import SeriesTOC from '@components/SeriesTOC.astro';
+import RenderDAG from '@components/RenderDAG.astro';
 
 <SeriesTOC series="claude-sdk" />
 
@@ -12,7 +14,7 @@ If you're like me, you want fine control over Claude's context window. Maybe
 you've even experimented with aggressive forking or surgery on JSONL session
 files. If so, this post is for you.
 
-Claude offers `/compact`, and hitting Esc-Esc and navigating a few turns back
+Claude Code offers `/compact`. Hitting Esc-Esc and navigating a few turns back
 in the conversation offers two more summarization options:
 
 - **Summarize up to here** replaces the earlier conversation with a summary and
@@ -22,66 +24,93 @@ in the conversation offers two more summarization options:
   which is basically this option without a summary.
 
 All of these operations stay within one session file. The file is an append-only
-tree: most entries have a `uuid` and a `parentUuid`. Compaction appends a special
+tree: each line is an entry (usually a message, sometimes bookkeeping), and most
+entries have a `uuid` and a `parentUuid`. Compaction appends a special
 system entry called a `compact_boundary`. When Claude Code loads the session,
 the boundary entry tells it how to rejigger the tree to construct Claude's
 context.
 
 The SDK provides no supported way to insert a boundary yourself. But you can
 stop a Query, append a hand-crafted boundary to its session file, and resume the
-same session. That gives you a powerful primitive: **replace Claude's
-conversational context with any ordered list of messages from the session** —
+same session. That gives you a powerful primitive: **replace Claude's context
+window with any ordered list of messages from the session** —
 keep only the messages that matter, splice in your own summary before or after
 them, resurrect messages from an abandoned branch, or empty the context
 entirely.
 
 ## Relinking: How the context window is built
 
-The assistant context window is determined by the last `compact_boundary` in the
-session file. The only part of a boundary we need to care about is
-`preservedMessages`:
+The assistant context window — "what the model gets" in the figures below — is
+determined by the last `compact_boundary` in the session file. The only part of a boundary we need to care about is
+`preservedMessages`, but here are some of the other fields you'll see if you
+peek in a session file:
 
 ```json
 {
   "type": "system",
   "subtype": "compact_boundary",
-  "uuid": "B",
+  "uuid": "<boundary-uuid>",
+  "parentUuid": null,
   "compactMetadata": {
     "preservedMessages": {
-      "anchorUuid": "<summary-or-boundary-uuid>",
-      "uuids": ["3", "4"]
+      # This is where the action is.
+      "anchorUuid": "<another-uuid>",
+      "uuids": ["msg 2", "msg 3"]
     }
   }
 }
 ```
 
-`uuids` is an ordered list of earlier session entries to preserve.  `anchorUuid`
-is either the boundary itself or a summary message appended after the boundary.
+`uuids` is an ordered list of earlier session entries to preserve. `anchorUuid`
+points to either the boundary itself or a summary message appended after the
+boundary.
 
-To construct the assistant's context window, the loader takes the most recent
-boundary and constructs this chain:
-
-```text
-anchor → preserved uuids → child of anchor → subsequent messages
-```
-
-In other words:
+To construct the assistant's context window, the loader does this:
 
 1. Reparent the preserved entries immediately after the anchor, in the order listed.
 2. Reparent the child of the anchor message (if any) after the end of the preserved list.
-3. Discard older entries that were not preserved.
+3. Discard entries older than the boundary that were not preserved.
 
 That's it. The boundary does not change the original entries in the JSONL; the
 loader relinks them in memory, which is why a later boundary can recover entries
 cut by an earlier one. The boundary message itself has no text body and does not
-appear in the assistant context.
+appear in the assistant context, even if it's the anchor.
+
+If you just look at `parentUuid`s in the session file, the graph is
+disconnected. The loader turns it into the assistant context:
+
+<div class="render-dags">
+<div>
+What's in the session file:
+<RenderDAG nodes={[
+  { id: 'msg1', message: 'msg 1' },
+  { id: 'msg2', message: 'msg 2' },
+  { id: 'msg3', message: 'msg 3' },
+  { id: 'boundary', message: 'compact boundary<br><code>{anchorUuid: "anchor",<br>&nbsp;uuids: ["msg 2", "msg 3"]}</code><br/>', parents: [] },
+  { id: 'anchor', message: 'anchor' },
+  { id: 'msg4', message: 'msg 4' },
+  { id: 'msg5', message: 'msg 5' },
+]} />
+</div>
+<div>
+What the model gets:
+<RenderDAG nodes={[
+  { id: 'anchor', message: 'anchor' },
+  { id: 'msg2', message: 'msg 2' },
+  { id: 'msg3', message: 'msg 3' },
+  { id: 'msg4', message: 'msg 4' },
+  { id: 'msg5', message: 'msg 5' },
+]} />
+</div>
+</div>
 
 The chain is recomputed on every load, so "the child of the anchor" means
 whatever the anchor's child is at load time. Entries appended after the boundary
 is written — a summary, or the next user turn — become the anchor's child and
-slot in after the preserved list. This is why both summary placements below fall
-out of the same rule, and why a synthetic boundary composes cleanly with
-whatever conversation follows it.
+slot in after the preserved list.
+
+That one rule does all the work: both summary placements below fall out of it,
+and a synthetic boundary composes cleanly with whatever conversation follows it.
 
 A boundary may preserve **any ordered selection of entries**, not just an existing
 branch of the session tree.
@@ -93,54 +122,82 @@ different choices of anchor and preserved messages.
 
 ### `/compact` and "Summarize up to here": summary first
 
-A summary is an ordinary user message appended after the boundary. For
-`/compact`, the summary is the anchor, and Claude Code preserves the final
-assistant API response (sometimes spread across multiple entries) before the
-compaction. For example, if your conversation so far is `1 → 2 → 3 → 4` and you
-`/compact`, the session will get a boundary message that looks like this:
+If you `/compact` after "msg 3", Claude Code generates a summary message behind
+the scenes and inserts it as a regular user message after the
+`compact_boundary`. That summary message is the anchor, and the final assistant
+API response (sometimes spread across multiple entries) goes into the preserved
+`uuids` field — here we're supposing messages 2 and 3 are the two entries of
+that final response.
 
-```text
-preservedMessages:
-  anchorUuid: S
-  uuids: [4]
-```
-
-and a summary message, which I'll call `S`, which the next message `5` will be a
-child of. The TUI shows you something like
-
-```text
-1 → 2 → 3 → 4 → [compacted] → S → 5
-```
-
-which may lead you to believe that `S → 5` is what's in context, but in fact
-relinking keeps the last couple of messages and puts the summary _before_ them:
-
-```text
-S → 4 → 5
-```
+Note that the assistant context is different from what the UI _shows you_. Not
+only is the last assistant response preserved, but it's _after_ the summary:
+<div class="render-dags">
+<div>
+What's in the session file:
+<RenderDAG nodes={[
+  { id: 'msg1', message: 'msg 1' },
+  { id: 'msg2', message: 'msg 2' },
+  { id: 'msg3', message: 'msg 3' },
+  { id: 'boundary', message: 'compact boundary<br><code>{anchorUuid: "summary",<br>&nbsp;uuids: ["msg 2", "msg 3"]}</code><br/>', parents: [] },
+  { id: 'anchor', message: 'summary' },
+  { id: 'msg4', message: 'msg 4' },
+  { id: 'msg5', message: 'msg 5' },
+]} />
+</div>
+<div>
+What the UI shows:
+<RenderDAG nodes={[
+  { id: 'anchor', message: 'summary' },
+  { id: 'msg4', message: 'msg 4' },
+  { id: 'msg5', message: 'msg 5' },
+]} />
+</div>
+<div>
+What the model gets:
+<RenderDAG nodes={[
+  { id: 'anchor', message: 'summary' },
+  { id: 'msg2', message: 'msg 2 (from <em>before</em> compaction)' },
+  { id: 'msg3', message: 'msg 3 (from <em>before</em> compaction)' },
+  { id: 'msg4', message: 'msg 4' },
+  { id: 'msg5', message: 'msg 5' },
+]} />
+</div>
+</div>
 
 **Summarize up to here** uses the same shape. The summary is the anchor, and
 `uuids` contains all the messages after the chosen point.
 
 ### "Summarize from here": recent summary last
 
-If your conversation so far is `1 → 2 → 3 → 4` and you navigate back to `2` and
-"Summarize from here", the session will get a boundary message that looks like
-this:
+If your conversation has 4 messages, and you rewind to message 2 with
+"Summarize from here", the compact boundary uses _itself_ as the anchor, puts
+those first two messages into the preserved `uuids` field, and generates a
+summary message which has the boundary as its parent:
 
-```text
-preservedMessages:
-  anchorUuid: B    // this boundary's uuid
-  uuids: [1, 2]
-```
-
-and a summary message, which I'll call `T`, whose parent is `B`, and which the
-next message `5` will be a child of. Relinking puts the preserved entries after
-`B` and moves `T` (`B`'s child) after them:
-
-```text
-B → 1 → 2 → T → 5
-```
+<div class="render-dags">
+<div>
+What's in the session file:
+<RenderDAG nodes={[
+  { id: 'msg1', message: 'msg 1' },
+  { id: 'msg2', message: 'msg 2' },
+  { id: 'msg3', message: 'msg 3' },
+  { id: 'msg4', message: 'msg 4' },
+  { id: 'boundary', message: 'boundary<br><code>{anchorUuid: "boundary",<br>&nbsp;uuids: ["msg 1", "msg 2"]}</code><br/>', parents: [] },
+  { id: 'summary', message: 'summary of 3 & 4' },
+  { id: 'next', message: 'your next message' },
+]} />
+</div>
+<div>
+What the model gets:
+<RenderDAG nodes={[
+  { id: 'boundary', message: 'boundary (renders as no message)'},
+  { id: 'msg1', message: 'msg 1' },
+  { id: 'msg2', message: 'msg 2' },
+  { id: 'summary', message: 'summary of 3 & 4' },
+  { id: 'next', message: 'your next message' },
+]} />
+</div>
+</div>
 
 There is no special "from" algorithm and no special summary placement rule. The
 summary is put at the end of the preserved list simply because it was the child
@@ -158,12 +215,12 @@ Once you understand boundaries as splices, `set-context` is straightforward:
 
 Choose the boundary's `anchorUuid` based on where the summary belongs:
 
-```text
-summary then selected messages:  anchor = summary
-selected messages then summary:  anchor = boundary
-selected messages, no summary:   anchor = boundary; omit summary
-empty conversational context:    uuids = []; omit summary
-```
+| Desired context window          | `anchorUuid` | `uuids`           | Summary message       |
+| ------------------------------- | ------------ | ----------------- | --------------------- |
+| summary, then selected messages | the summary  | selected messages | append after boundary |
+| selected messages, then summary | the boundary | selected messages | append after boundary |
+| selected messages, no summary   | the boundary | selected messages | omit                  |
+| empty context window            | the boundary | `[]`              | omit                  |
 
 ## Gotchas, Caveats, Notes, and Tips
 
@@ -191,3 +248,6 @@ empty conversational context:    uuids = []; omit summary
   to insert a boundary at all. You can just restart your Query and set the
   `resumeSessionAt` option to point to the target message. However, if you want
   to rewind to a message no longer in context, you have to insert a boundary entry.
+
+Okay, you made it to the end. Thanks for coming to my office hours. Have fun
+managing your context windows out there.

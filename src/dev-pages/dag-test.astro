@@ -1,0 +1,88 @@
+---
+import BaseHead from '@components/BaseHead.astro';
+import RenderDAG from '@components/RenderDAG.astro';
+---
+
+<html lang="en">
+  <head>
+    <BaseHead title="RenderDAG test" description="scratch page" />
+  </head>
+  <body>
+    <main>
+      <h2>Linear chain (above)</h2>
+      <RenderDAG nodes={['1', '2', '3', '4']} />
+
+      <h2>Branch + long wrapping message (above)</h2>
+      <RenderDAG
+        nodes={[
+          '1',
+          {
+            id: '2',
+            message:
+              'a much longer message that should wrap onto several lines on a narrow screen, to check that the edge columns visually continue through the tall message without gaps ' +
+              'and keep continuing all the way to the bottom of the row',
+          },
+          '3',
+          '4',
+          { id: '5', parents: ['2'], message: 'branched from 2' },
+        ]}
+      />
+
+      <h2>Spec golden example (below)</h2>
+      <RenderDAG
+        parents="below"
+        nodes={[
+          { id: '4', glyph: 'x', parents: ['2', '3'], message: 'final' },
+          { id: '3', glyph: 'o', parents: ['1'], message: 'middle' },
+          { id: '2', glyph: 'o', message: 'middle' },
+          { id: '1', glyph: 'o', message: 'start' },
+        ]}
+      />
+
+      <h2>Ancestors + anonymous (above)</h2>
+      <RenderDAG
+        nodes={[
+          { id: 'B', anonymousAncestors: 1, message: 'boundary' },
+          { id: '1', parents: ['B'] },
+          { id: '2', parents: ['1'] },
+          { id: 'Y', parents: ['2'], ancestors: ['B'], message: 'summary' },
+          { id: '5', parents: ['Y'] },
+        ]}
+      />
+
+      <h2>HTML glyphs and classes</h2>
+      <RenderDAG
+        nodes={[
+          { id: 'X', glyph: '<span style="color: #a78bfa">◆</span>', message: '<em>summary</em>', class: 'demo-summary' },
+          '4',
+          '5',
+        ]}
+      />
+
+      <h2>Disconnected roots</h2>
+      <RenderDAG nodes={['1', '2', { id: '3', parents: [] }, '4']} />
+
+      <h2>Square corners (below)</h2>
+      <RenderDAG
+        parents="below"
+        corners="square"
+        nodes={[
+          { id: '4', parents: ['2', '3'], message: 'final' },
+          { id: '3', parents: ['1'], message: 'middle' },
+          { id: '2', message: 'middle' },
+          { id: '1', message: 'start' },
+        ]}
+      />
+
+      <h2>Dashed ancestor corner (below)</h2>
+      <RenderDAG
+        parents="below"
+        nodes={[
+          { id: '4', parents: ['2'] },
+          { id: '3', ancestors: ['2'], message: 'indirect descendant of 2' },
+          { id: '2', parents: [] },
+        ]}
+      />
+    </main>
+  </body>
+</html>

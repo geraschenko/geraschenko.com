@@ -1,0 +1,265 @@
+---
+import {
+  dagRows,
+  linePaths,
+  type Cell,
+  type CornerStyle,
+  type DagNodeInput,
+  type ParentDirection,
+} from './render-dag';
+import type { PadLine } from '@geraschenko/renderdag';
+
+interface Props {
+  nodes: DagNodeInput[];
+  parents?: ParentDirection;
+  corners?: CornerStyle;
+}
+const { nodes, parents = 'above', corners = 'curved' } = Astro.props;
+const rows = dagRows(nodes, parents);
+
+// Fillers continue open edge columns through tall messages and across row
+// boundaries: one vertical line per non-blank column, centered on the
+// column's strokes (cells are 2ch wide, stroke centers at 0.5ch of each).
+// Fillers are SVG strokes like the cell lines — CSS gradients rasterize
+// differently from SVG strokes (thickness and sub-pixel position), which
+// showed as wobble at every cell/filler handoff. The filler SVG has no
+// viewBox (so its height can stretch without scaling stroke or dash
+// geometry) and positions lines by percentage of its 2n·ch width, which
+// resolves to the same (2i+0.5)ch centers the cell SVGs use.
+function fillerLines(columns: PadLine[]): { x: string; dashed: boolean }[] {
+  return columns.flatMap((column, i) =>
+    column === 'blank'
+      ? []
+      : [
+          {
+            x: `${(((2 * i + 0.5) / (2 * columns.length)) * 100).toFixed(4)}%`,
+            dashed: column === 'ancestor',
+          },
+        ],
+  );
+}
+
+// Each prefix line is one SVG spanning all cells, with node/term glyphs
+// overlaid as positioned spans. A single SVG per line (origin at the line's
+// left edge, like the fillers) keeps strokes aligned across lines: browsers
+// pixel-snap each SVG element's rendering origin, so an SVG starting at a
+// fractional mid-line offset would shift its strokes by up to half a pixel
+// relative to neighboring lines.
+type Glyph = { type: 'node' | 'term'; cellIndex: number };
+function lineGlyphs(cells: Cell[]): Glyph[] {
+  return cells.flatMap((cell, cellIndex) =>
+    cell.type === 'strokes' ? [] : [{ type: cell.type, cellIndex }],
+  );
+}
+---
+
+<figure class="render-dag">
+  {
+    rows.map((row, i) => {
+      const prefillColumns = i > 0 && !row.separator ? rows[i - 1]!.fillerColumns : [];
+      return (
+      <>
+        {row.separator && <div class="dag-sep" />}
+        <div class:list={['dag-row', row.node.className]}>
+          {/* The prefill offsets the node line to center against the
+              message's first line, painted with the previous row's open
+              columns so edges stay continuous across the row boundary. */}
+          <div class="dag-prefix">
+            <svg
+              class="dag-filler dag-prefill"
+              style={`width: ${2 * prefillColumns.length}ch`}
+              aria-hidden="true"
+            >
+              {fillerLines(prefillColumns).map((l) => (
+                <line
+                  class={l.dashed ? 'dag-stroke-dashed' : 'dag-stroke-solid'}
+                  x1={l.x}
+                  y1="0"
+                  x2={l.x}
+                  y2="100%"
+                />
+              ))}
+            </svg>
+            {row.prefixLines.map((line) => {
+              const paths = linePaths(line.cells, corners);
+              return (
+                <div class="dag-prefix-line" style={`width: ${2 * line.cells.length}ch`}>
+                  <svg
+                    class="dag-cells"
+                    viewBox={`0 0 ${2 * line.cells.length} 1`}
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    {paths.solid && (
+                      <path
+                        class="dag-stroke-solid"
+                        d={paths.solid}
+                        vector-effect="non-scaling-stroke"
+                      />
+                    )}
+                    {paths.dashed && (
+                      <path
+                        class="dag-stroke-dashed"
+                        d={paths.dashed}
+                        vector-effect="non-scaling-stroke"
+                      />
+                    )}
+                  </svg>
+                  {lineGlyphs(line.cells).map((glyph) => (
+                    <span class="dag-glyph" style={`left: ${2 * glyph.cellIndex}ch`}>
+                      {glyph.type === 'term' ? (
+                        '~'
+                      ) : (
+                        <Fragment set:html={row.node.glyph} />
+                      )}
+                    </span>
+                  ))}
+                </div>
+              );
+            })}
+            <div class="dag-postfill">
+              <svg
+                class="dag-filler"
+                style={`width: ${2 * row.fillerColumns.length}ch`}
+                aria-hidden="true"
+              >
+                {fillerLines(row.fillerColumns).map((l) => (
+                  <line
+                    class={l.dashed ? 'dag-stroke-dashed' : 'dag-stroke-solid'}
+                    x1={l.x}
+                    y1="0"
+                    x2={l.x}
+                    y2="100%"
+                  />
+                ))}
+              </svg>
+            </div>
+          </div>
+          <div class="dag-msg" set:html={row.node.message} />
+        </div>
+      </>
+      );
+    })
+  }
+</figure>
+
+<style is:global>
+  .render-dag {
+    /* Shared stroke geometry: cell and filler SVGs read the same values, so
+       widths, positions, and dash rhythm agree by construction. --dag-dash
+       is the dash/gap length in em. Both SVG kinds consume it as a CSS em
+       length: filler user units are CSS px, and cell paths use
+       non-scaling-stroke, which computes the whole stroke — dash pattern
+       included — in screen space (a unitless value there would mean
+       fractions of a screen pixel, rendering as dust). */
+    --dag-line-width: 1.5px;
+    --dag-dash: 0.25;
+    /* Vertical overdraw past each filler's bottom edge, covering the faint
+       antialiasing seam where stacked SVGs abut (the element below always
+       continues the edge). Cell paths overdraw the same amount via OVERDRAW
+       in render-dag.ts — keep them in sync. */
+    --dag-overdraw: 0.006em;
+    margin: 0.25em 0 1em;
+    /* Bordered shrink-to-fit tile: visible bounds matter (disconnected
+       graphs are confusing without them). Radius matches the site's pre/img
+       blocks. */
+    width: fit-content;
+    max-width: 100%;
+    border: 1px solid rgba(var(--gray), 50%);
+    border-radius: 8px;
+    padding: 0.25em 0.75em;
+  }
+  /* Wrapper for before/after figure pairs: side by side on desktop, stacked
+     on narrow viewports. No flex-wrap — wrapping happens before shrinking,
+     so a tile with one long message line would force a premature stack;
+     instead tiles shrink (messages wrap) until the media query stacks them. */
+  .render-dags {
+    display: flex;
+    gap: 0 2em;
+    align-items: flex-start;
+  }
+  .render-dags > div {
+    min-width: 0;
+  }
+  @media (max-width: 720px) {
+    .render-dags {
+      flex-direction: column;
+    }
+  }
+  /* A caption paragraph sits tight above its tile: the normal paragraph
+     margin would otherwise collapse in and detach it. */
+  p:has(+ .render-dag) {
+    margin-bottom: 0.25em;
+  }
+  .render-dag .dag-row {
+    display: flex;
+    gap: 1ch;
+  }
+  .render-dag .dag-prefix {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace;
+    line-height: 1;
+  }
+  .render-dag .dag-prefix-line {
+    position: relative;
+    flex: none;
+    height: 1em;
+  }
+  .render-dag .dag-cells {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .render-dag .dag-cells path,
+  .render-dag .dag-filler line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--dag-line-width);
+  }
+  .render-dag .dag-stroke-dashed {
+    stroke-dasharray: calc(var(--dag-dash) * 1em) calc(var(--dag-dash) * 1em);
+  }
+  .render-dag .dag-glyph {
+    /* Overlaid on the line's SVG at the cell's left 1ch, centered on the
+       stroke column; wider glyphs overflow symmetrically. */
+    position: absolute;
+    top: 0;
+    width: 1ch;
+    text-align: center;
+  }
+  .render-dag .dag-filler {
+    display: block;
+    overflow: visible;
+  }
+  .render-dag .dag-prefill {
+    /* Layout size 0.35em: half the difference between the message line box
+       and the 1em node line, so their centers align. The SVG viewport is
+       taller by the overdraw (its 100%-tall lines then reach past the seam),
+       with a negative margin so following lines aren't pushed down. */
+    height: calc(0.35em + var(--dag-overdraw));
+    margin-bottom: calc(-1 * var(--dag-overdraw));
+    flex: none;
+  }
+  .render-dag .dag-postfill {
+    /* A plain div wrapping the filler SVG: a replaced element's intrinsic
+       150px height would inflate the flex container's intrinsic size, so
+       the SVG fills this div absolutely instead of being the flex item. */
+    flex: 1;
+    position: relative;
+  }
+  .render-dag .dag-postfill .dag-filler {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: calc(100% + var(--dag-overdraw));
+  }
+  .render-dag .dag-msg {
+    min-width: 0;
+  }
+  .render-dag .dag-sep {
+    height: 0.5em;
+  }
+</style>

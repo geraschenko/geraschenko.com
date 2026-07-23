@@ -76,9 +76,6 @@ a:hover {
 p {
 	margin-bottom: 1em;
 }
-.prose p {
-	margin-bottom: 2em;
-}
 textarea {
 	width: 100%;
 	font-size: 16px;
@@ -87,7 +84,15 @@ input {
 	font-size: 16px;
 }
 table {
-	width: 100%;
+	width: fit-content;
+	max-width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 1em;
+}
+th,
+td {
+	border: 1px solid rgba(var(--gray), 50%);
+	padding: 0.25em 0.75em;
 }
 img {
 	max-width: 100%;
