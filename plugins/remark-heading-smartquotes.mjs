@@ -1,4 +1,5 @@
-// This can be removed if https://github.com/silvenon/remark-smartypants/pull/103 is merged upstream.
+// This is fixed in https://github.com/silvenon/remark-smartypants/pull/103
+// upstream and can be removed once remark-smartypants is at least v3.0.3.
 
 import { visit } from 'unist-util-visit';
 
