@@ -2,9 +2,10 @@
 title: "Controlling Claude's context window: compaction and friends"
 description: 'A compact reference for transcript relinking in Claude Agent SDK.'
 pubDate: 2026-07-22
-updatedDate: 2026-07-31
+updatedDate: 2026-09-02
 heroImage: 'relink_tree.svg'
 ---
+import Boxed from '@components/Boxed.astro';
 import RenderDAG from '@components/RenderDAG.astro';
 
 If you're like me, you want fine control over Claude's context window. Maybe
@@ -13,7 +14,7 @@ files. If so, this post is for you.
 
 <nav aria-labelledby="contents">
   <ul>
-    <li><a href="#relinking">Relinking: how the context window is built</a></li>
+    <li><a href="#loader">How a session file becomes a context window</a></li>
     <li>
       <a href="#examples">Examples</a>
       <ul>
@@ -27,7 +28,9 @@ files. If so, this post is for you.
 </nav>
 
 Claude Code offers `/compact`. Hitting Esc-Esc and navigating a few turns back
-in the conversation offers two more summarization options:
+in the conversation offers two more summarization options [Edit: somewhere
+between claude versions 2.1.195 and 2.1.258, the summarize variants were
+removed, leaving only "restore"]:
 
 - **Summarize up to here** replaces the earlier conversation with a summary and
   leaves the newer messages intact.
@@ -50,7 +53,7 @@ keep only the messages that matter, splice in your own summary before or after
 them, resurrect messages from an abandoned branch, or empty the context
 entirely.
 
-<h2 id="relinking">Relinking: how the context window is built</h2>
+<h2 id="loader">How a session file becomes a context window</h2>
 
 The assistant context window — "what the model gets" in the figures below — is
 determined by the last `compact_boundary` in the session file. The only part of
@@ -77,16 +80,20 @@ the other fields you'll see if you peek in a session file:
 points to either the boundary itself or a summary message appended after the
 boundary.
 
-To construct the assistant's context window, the loader does this:
+The context window is three pieces glued together, in this order:
 
-1. Reparent the preserved entries immediately after the anchor, in the order listed.
-1. Reparent the child of the anchor message (if any) after the end of the preserved list.
-1. Discard entries older than the boundary that were not preserved.
+<Boxed>
+1. **The anchor message.** If the anchor is the boundary itself, this piece is
+   empty: the boundary has no text body and never appears in the assistant
+   context.
+1. **The preserved messages**, in the order listed in `uuids` (original `parentUuid`s are ignored).
+1. **The current branch,** the `parentUuid`-based path from the anchor message
+  to the last user or assistant entry in the session file.<sup>&dagger;</sup>
+</Boxed>
 
 That's it. The boundary does not change the original entries in the JSONL; the
-loader relinks them in memory, which is why a later boundary can recover entries
-cut by an earlier one. The boundary message itself has no text body and does not
-appear in the assistant context, even if it's the anchor.
+loader assembles the context in memory on every load, which is why a later
+boundary can recover entries cut by an earlier one.
 
 <div class="render-dags">
 <div>
@@ -115,10 +122,9 @@ What the model gets:
 (Note: the boundary's `parentUuid` is `null`. The dashed line here is
 `logicalParentUuid`, which is ignored when constructing the context window.)
 
-The chain is recomputed on every load, so "the child of the anchor" means
-whatever the anchor's child is at load time. Entries appended after the boundary
-is written — a summary, or the next user turn — become the anchor's child and
-slot in after the preserved list.
+Because the current branch is recomputed on every load, entries appended after
+the boundary is written — a summary, or the next user turn — become the anchor's
+descendants and slot in after the preserved list.
 
 That one rule does all the work: both summary placements below fall out of it,
 and a synthetic boundary composes cleanly with whatever conversation follows it.
@@ -244,7 +250,7 @@ What's in the session file:
   { id: 'msg2', message: 'msg 2' },
   { id: 'msg3', message: 'msg 3' },
   { id: 'msg4', message: 'msg 4' },
-  { id: 'boundary1', message: 'boundary 1 (rewind, no summary<sup>&dagger;</sup>)<br><code>{anchorUuid: "boundary 1",<br>&nbsp;uuids: ["msg 1", "msg 2"]}</code><br/>', ancestors: ['msg2'] },
+  { id: 'boundary1', message: 'boundary 1 (rewind, no summary<sup>&ddagger;</sup>)<br><code>{anchorUuid: "boundary 1",<br>&nbsp;uuids: ["msg 1", "msg 2"]}</code><br/>', ancestors: ['msg2'] },
   { id: 'msg3v2', message: 'msg 3v2' },
   { id: 'msg5', message: 'msg 5' },
   { id: 'msg6', message: 'msg 6' },
@@ -274,13 +280,27 @@ What the model gets:
 
 <h2 id="gotchas">Gotchas, Caveats, Notes, and Tips</h2>
 
-1. The loader silently sanitizes the result before sending it to the API. For
-  example, if you preserve a tool call but omit its result, the orphaned tool
-  call is dropped. So if you want to preserve tool calls and responses, be
-  careful to include both in the preserved message list.
-1. If `uuids` contains duplicates, or references entries that don't appear
-  earlier in the file, relinking is silently skipped and the boundary behaves as
-  if `uuids` were empty.
+1. The loader silently sanitizes tool-call pairing before sending the request.
+  A tool call whose result is missing from context is dropped (the rest of its
+  response survives); a result whose call is missing is dropped too.
+1. <sup>&dagger;</sup>The rules assume the latest message descends from the
+  anchor of the latest boundary, which is always true for files Claude Code
+  writes itself. If the parent walk ever hits a message _earlier_ than the
+  anchor that wasn't preserved, the loader treats it as if it hit the anchor.
+1. <sup>&dagger;</sup>When Claude makes several tool calls in one
+  response, the file records each result as a child of its own tool call rather
+  than as a chain, so a parent walk reaches only one of the results. The loader
+  patches this by pulling the missing calls and results of each response it
+  walks through back in. (Why not just linearized as the entries are written to
+  the file? My guess is that each entry's `parentUuid` is meant to be determined
+  when the entry is written, independent of what else has landed in the file by
+  then.) This patching applies to the current branch, not to the preserved list:
+  the list gets exactly the entries it names, so a list that names some entries
+  of a multi-entry response gets only those.
+1. If `uuids` references an entry that isn't in the file, the loader silently
+  gives up on the boundary: no relinking, no discarding, and the walk follows
+  the file's original parent links (typically, the model sees only what came
+  after the boundary). Duplicates in `uuids` are not checked; don't write them.
 1. The set-context recipe changes conversation history only. It can't change the
   system prompt, tools, MCP servers, permissions, or filesystem state.
 1. The session file may lag behind the SDK's `result` event by ~100ms. In step 1
@@ -292,9 +312,9 @@ What the model gets:
   before accepting the next user turn. Native compaction may separately
   re-inject recent tool calls and results as `<system-reminder>` text. A
   synthetic boundary does not get that behavior for free.
-1. This recipe is hacking internals and may break in the future. It was tested on
-  Claude Agent SDK **0.3.195**, whose bundled Claude Code CLI is **2.1.195**.
-1. <sup>&dagger;</sup>If you just want to rewind to a message _in active
+1. This recipe is hacking internals and may break in the future. It was tested
+  on Claude Agent SDK **0.3.258** (bundled Claude Code CLI **2.1.258**).
+1. <sup>&ddagger;</sup>If you just want to rewind to a message _in active
   context_, you don't need to insert a boundary at all. You can just restart
   your Query and set the `resumeSessionAt` option to point to the target
   message. However, if you want to rewind to a message no longer in context, you

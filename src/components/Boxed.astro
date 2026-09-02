@@ -1,0 +1,14 @@
+---
+/** A bordered tile for content the reader should remember; accent-colored
+ * so it reads as a highlight. */
+---
+
+<div class="boxed"><slot /></div>
+
+<style>
+  .boxed {
+    margin: 0.25em 0 1em;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+  }
+</style>
