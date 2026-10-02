@@ -4,7 +4,7 @@ const { text, paperclips } = Astro.props;
 
 <div class={`card ${paperclips < 0 ? 'flipped' : ''}`}>
     {text}
-    {Array.from({ length: paperclips }).map((_, index) => (
+    {Array.from({ length: paperclips }).map(() => (
       <span class="paperclip">📎</span>
     ))}
 </div>

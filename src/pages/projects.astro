@@ -5,7 +5,6 @@ import Footer from "../components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 import { Content as Intro } from "../content/projects-intro.md";
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import FormattedDate from "../components/FormattedDate.astro";
 
 const projects: CollectionEntry<"projects">[] = (
 	await getCollection("projects")
@@ -17,6 +16,21 @@ const rendered = await Promise.all(
 		Content: (await render(project)).Content,
 	})),
 );
+
+const publications = (await getCollection("publications")).sort(
+	(a, b) => a.data.order - b.data.order,
+);
+
+const SCHOLAR_URL = "https://scholar.google.com/citations?user=g260QhgAAAAJ";
+
+/** "Nature 635(8038):365–369" / "AGU Fall Meeting Abstracts, G54A-02" / "PhD thesis, …" */
+function venueLine(p: CollectionEntry<"publications">["data"]): string {
+	const issue = p.number ? `(${p.number})` : "";
+	const where = [p.volume && `${p.volume}${issue}`, p.pages]
+		.filter(Boolean)
+		.join(":");
+	return where ? `${p.venue} ${where}` : p.venue;
+}
 ---
 
 <!doctype html>
@@ -51,6 +65,25 @@ const rendered = await Promise.all(
 			.description :global(p) {
 				margin: 0;
 			}
+			.legend {
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+			}
+			.publications {
+				padding-left: 1.5rem;
+			}
+			.publications li {
+				margin-bottom: 1rem;
+			}
+			.pub-title {
+				font-weight: bold;
+			}
+			.authors {
+				font-size: 0.9em;
+			}
+			.note {
+				color: rgb(var(--gray));
+			}
 		</style>
 	</head>
 	<body>
@@ -76,6 +109,55 @@ const rendered = await Promise.all(
 						))
 					}
 				</ul>
+			</section>
+			<section>
+				<h2>Publications</h2>
+				<ol class="publications">
+					{
+						publications.map(({ data: p }) => (
+							<li>
+								<span class="pub-title">{p.title}</span>
+								<br />
+								<span class="authors">
+									{p.authors.map((a, i) => (
+										<>
+											{i > 0 && ", "}
+											{a.name}
+											{a.cofirst && <sup>*</sup>}
+										</>
+									))}
+								</span>
+								<br />
+								{venueLine(p)} ({p.year}).
+								{p.doi && (
+									<>
+										{" "}
+										<a href={`https://doi.org/${p.doi}`}>doi:{p.doi}</a>
+									</>
+								)}
+								{p.arxiv && (
+									<>
+										{" "}
+										<a href={`https://arxiv.org/abs/${p.arxiv}`}>
+											arXiv:{p.arxiv}
+										</a>
+									</>
+								)}
+								{p.note && (
+									<>
+										{" "}
+										<span class="note">{p.note}.</span>
+									</>
+								)}
+							</li>
+						))
+					}
+				</ol>
+				<p class="legend">
+					<sup>*</sup> co-first author. In mathematics, author order is
+					alphabetical. See also my{" "}
+					<a href={SCHOLAR_URL}>Google Scholar profile</a>.
+				</p>
 			</section>
 		</main>
 		<Footer />

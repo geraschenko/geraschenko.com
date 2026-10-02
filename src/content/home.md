@@ -2,12 +2,13 @@ I'm Anton Geraschenko. I'm a mathematician and software engineer. I've
 worked/studied at Google, Plasmidsaurus, Eonite Perception, Caltech, UC
 Berkeley, and Brandeis.
 
-Lately I've been thinking about agentic coding, particularly (a) task-vs-agent
-duality in how people orchestrate agents, (b) strategies for incremental
-migration of workflows human-to-agent-to-code, and (c) harness features to
-reduce cognitive load on the agent. I really like [pi](https://pi.dev/) and
-wrote [pictl](https://github.com/geraschenko/pictl) to experiment with some of
-these "expand the harness" ideas.
+Lately I've been thinking about agentic engineering, particularly (a)
+task-vs-agent duality in how people orchestrate agents, (b) strategies for
+incremental migration of workflows human-to-agent-to-code, and (c) harness
+features to reduce cognitive load on the agent. I wrote
+[clauctl](https://github.com/geraschenko/clauctl) and
+[pictl](https://github.com/geraschenko/pictl) to experiment with some of these
+"expand the harness" ideas.
 
 I'm also interested in probability, information theory, and reinforcement
 learning. Some of my public-facing projects include using millions of phones

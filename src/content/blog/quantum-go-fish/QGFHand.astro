@@ -13,7 +13,7 @@ const cardEntries = Object.entries(cards);
     ))}
     <div class="unattached-paperclips">
       <span>&nbsp;</span>
-      {Array.from({ length: paperclips }).map((_, index) => (
+      {Array.from({ length: paperclips }).map(() => (
         <span class="paperclip">📎</span>
       ))}
     </div>
