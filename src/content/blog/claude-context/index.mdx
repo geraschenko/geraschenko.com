@@ -291,7 +291,9 @@ What the model gets:
   response, the file records each result as a child of its own tool call rather
   than as a chain, so a parent walk reaches only one of the results. The loader
   patches this by pulling the missing calls and results of each response it
-  walks through back in. (Why not just linearized as the entries are written to
+  walks through back in, together with what hangs off them (attachments, and
+  injected messages such as the instructions a Skill call loads), in the order
+  they were written to the file. (Why not just linearized as the entries are written to
   the file? My guess is that each entry's `parentUuid` is meant to be determined
   when the entry is written, independent of what else has landed in the file by
   then.) This patching applies to the current branch, not to the preserved list:
