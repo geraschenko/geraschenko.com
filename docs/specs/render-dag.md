@@ -1,5 +1,8 @@
 # RenderDAG: a general-purpose DAG-drawing Astro component
 
+**Status: finished (2026-10-19).** This spec is now history; the code is the
+source of truth. Deferred follow-ups are listed in the last WORK LOG entry.
+
 # SPEC
 
 ## Problem statement
@@ -486,7 +489,7 @@ collapse is what discards dashedness at corners, not the data.
   categories deferred to review.
 - Note: `src/pages/dag-test.astro` is a temporary visual-check page (renders
   all component features); delete before publishing or keep as a demo.
-- [ ] 2026-07-23 review feedback round (TDC comments in commit 1758f99).
+- [x] 2026-07-23 review feedback round (TDC comments in commit 1758f99).
   **All proposals below APPROVED by Anton 2026-07-23**, except the
   square/curved glyph-set API, which is DEFERRED to the SVG round (it will
   likely become a corner-style knob on the SVG renderer rather than a
@@ -516,7 +519,7 @@ collapse is what discards dashedness at corners, not the data.
   root exports (`PrefixLine`, `isRepeatable`); fixed implicit-`any` errors
   in the `devPages` integration with an `AstroIntegration` annotation;
   15/15 tests and `astro check` clean.
-- [ ] 2026-07-23: SPEC section rewritten for the SVG renderer (problem
+- [x] 2026-07-23: SPEC section rewritten for the SVG renderer (problem
   statement, success criteria, cell/corner/dash definitions, type design
   with `CellLine`/`linePaths` and the `corners` prop, data flow, cost, edge
   cases incl. dash-rhythm anisotropy, non-goals). Critique pass fixed:
@@ -710,6 +713,12 @@ collapse is what discards dashedness at corners, not the data.
   around two `<div>`s each holding a caption + `<RenderDAG>`. (A raw
   `<style>` tag in MDX does not work: micromark parses `{...}` CSS bodies as
   JSX expressions and the build fails — component-level styling is the way.)
+- [x] **Finished** (Anton, 2026-10-19). RenderDAG is in use in the compaction
+  post and the review-commands post. Deferred, not planned:
+  - Unified-SVG redesign (one SVG per prefix with continuous per-column
+    paths) for seam robustness; the 0.006em filler overdraw remains the
+    accepted interim, with blank seams possible at DPR 1 plus fractional
+    offsets (see "Overdraw bumps vs seam robustness" above).
 
 ## Implementation-Time Decisions
 
