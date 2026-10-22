@@ -1,0 +1,149 @@
+---
+title: "Claude Code settings recommendations"
+description: "Settings to keep Claude Code from misinforming, contradicting, and burying its own agent."
+pubDate: 2026-10-23
+heroImage: 'tool-costs-hero.svg'
+---
+import { Code } from 'astro:components';
+import TerminalCapture from '@components/TerminalCapture.astro';
+import ToolCostChart from './ToolCostChart.astro';
+import toolSettingsJson from './tool-settings.json?raw';
+import thriftySonicLoop from './thrifty-sonic-loop.ansi?raw';
+import contextAll from './context-all.ansi?raw';
+
+My work suffers when I'm given contradictory instructions, buried in stuff I'll never use, or misinformed about my own situation. The same is true for agents. Claude Code's default settings commit all these sins against the agent. You can fix it in `~/.claude/settings.json`, but the settings are sometimes opaque (or undocumented), so I put together this guide to settings I've found myself recommending repeatedly, with explanations so you can decide if they make sense for you too.
+
+<nav aria-labelledby="contents">
+  <ul>
+    <li><a href="#keep">Keep your sessions</a></li>
+    <li><a href="#token-reminder">Tell Claude how much context is left</a></li>
+    <li><a href="#no-bash">Don't force Claude to use `sed -n "XX,YYp"` to read files</a></li>
+    <li>
+      <a href="#tools">Trim tools and features you don't use</a>
+      <ul>
+        <li><a href="#tool-list">Token cost and definition of each tool</a></li>
+        <li><a href="#feature-list">What the features do</a></li>
+        <li><a href="#context-all">`/context all` shows what's using context</a></li>
+      </ul>
+    </li>
+    <li><a href="#how">How to decide</a></li>
+  </ul>
+</nav>
+
+All this was tested with Claude Code 2.1.280 by inspecting session files, asking Claude what it sees, intercepting API requests, and being obsessive in a variety of other ways.
+
+<h2 id="keep">Keep your sessions</h2>
+
+```json
+{
+  "cleanupPeriodDays": 365000
+}
+```
+
+By default Claude Code deletes session files older than 30 days. I know we're living in a fast-paced time where 30 days feels like a lifetime, but I sometimes want to go back to something older than that. If nothing else, hold onto these so that Claude can pore over them to help you use the product better. My setting of 1000 years may be overshooting in the other direction, but I'm not hurting for disk space.
+
+<h2 id="token-reminder">Tell Claude how much context is left</h2>
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_TOTAL_TOKENS_REMINDER": "off",
+    "CLAUDE_CODE_ENABLE_TOKEN_USAGE_ATTACHMENT": true
+  }
+}
+```
+
+TOTAL_TOKENS_REMINDER's default setting causes it to regularly see this message:
+
+```
+<total_tokens>15000000 tokens left</total_tokens>
+```
+
+The count goes down as the assistant turn goes on, but resets to 15M every time you send a message, so it's always pretty close to 15M. It's some kind of a task budget, _not_ a measure of how much context window the model has left or how far you are into your 5-hour or weekly usage. Your context window is 200k or 1M tokens; the model is told it has 15M. I have no idea why this flag exists or why it is on by default. Note that this flag is enum-valued, not boolean-valued, so you have to set it to `"off"`, not `false`.
+
+ENABLE_TOKEN_USAGE_ATTACHMENT is an actually useful version that's off by default. It tells the agent roughly how much context window it has left with messages like this:
+
+```
+Token usage: 41210/180000; 138790 remaining
+```
+
+The total is the context window size minus a reserve for the model's reply, so 180k for a 200k window. I enabled this recently, and I like that it makes the agent able to reason about its context window (e.g. "I'm getting close to auto-compaction, so I'd better record my progress."). However, you have to put something in your CLAUDE.md to explain what the limit _means_. Otherwise when context fills up it starts aggressively delegating to subagents because it worries that when it hits the limit it will be destroyed rather than compacted---a reasonable misunderstanding. I recommend something like this:
+
+```markdown
+**A full window compacts; the session continues.** You write the summary and keep working, with the transcript path for lookups. At high token usage, land at a clean state (notes, spec, a commit-ready tree) so the summary writes itself, then keep going.
+```
+
+<h2 id="no-bash">Don't force Claude to use `sed -n "XX,YYp"` to read files</h2>
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_THRIFTY_SONIC": false
+  }
+}
+```
+
+I stumbled into this undocumented environment variable when I saw Claude try to read a file with `sed`, get the "Output too large" message pointing it to a file with the full output, then try to use `cat` to read that file, get blocked **again** for the same damn reason, then give up and read the original file a couple hundred lines at a time. I asked Claude why it reached for `sed -n` instead of its Read tool, and it told me that it's guided to use Bash whenever possible.
+
+Anybody who's had to deal with pointless bureaucratic approvals will find this painfully relatable:
+
+<TerminalCapture capture={thriftySonicLoop} />
+
+Of course the agent persisted without complaint and got the job done. Stock Claude Code makes it very difficult to notice this behavior, because it either collapses everything into "Ran 5 shell commands" or shows the full outputs. The above capture is from [clauctl](https://github.com/geraschenko/clauctl), my own wrapper around the Claude Agent SDK; it's been lightly edited for clarity.
+
+It turns out that THRIFTY_SONIC causes the assistant to get this guidance in auto and bypass-permissions mode:
+
+> Do your work through the Bash tool wherever it can accomplish the job: read
+> files with cat, head, or sed -n, search with grep and find, and make file
+> changes with sed, heredocs, or short scripts, rather than using the dedicated
+> Read, Edit, or Write tools. Fall back to a dedicated tool only when Bash
+> genuinely cannot do the job.
+
+The Bash-maxxing guidance is completely hidden from you. It's not shown in the terminal or the session file. It's injected by the harness when it builds the API request.
+
+Meanwhile, the Bash tool's own definition (in the same request) says:
+
+> IMPORTANT: Avoid using this tool to run `cat`, `head`, `tail`, `sed`, `awk`,
+> or `echo` commands, unless explicitly instructed or after you have verified
+> that a dedicated tool cannot accomplish your task.
+
+<h2 id="tools">Trim tools and features you don't use</h2>
+
+Here's what I use, but your tool/feature set should be based on how you use Claude Code. The tables below can help you decide what to trim.
+
+<Code code={toolSettingsJson} lang="json" />
+
+Tool definitions are included in _every_ call to the model. That's how the agent knows what the tools are and how to use them. If the harness includes tools you never use, those definitions are polluting your context window. You can fix that by adding the offending tool to your deny list. Similarly, features you never use can expand the system prompt. I was turned onto this issue by Matt Pocock's [How To Kill The Bloat In Claude Code's System Prompt](https://www.aihero.dev/how-to-kill-the-bloat-in-claude-codes-system-prompt). 
+
+If a tool is "deferred," its definition is only included once the agent requests it with the ToolSearch tool, so leaving it enabled doesn't do so much damage, but I still prefer to disable tools I don't want to use.
+
+<h3 id="tool-list">Token cost and definition of each tool</h3>
+<ToolCostChart />
+
+<h3 id="feature-list">What the features do</h3>
+
+| Setting | What it turns off |
+| :- | :- |
+| `enableWorkflows: false` | [Dynamic workflows](https://code.claude.com/docs/en/workflows): the Workflow tool and the bundled workflow commands. `disableWorkflows` does the same for everyone your settings reach (it's meant for organizations). |
+| `enableArtifact: false` | The [Artifact](https://code.claude.com/docs/en/artifacts) tool, which publishes session output as a live web page on claude.ai, even from a local session. Same as the **Artifacts** toggle in `/config`. |
+| `disableBundledSkills: true` | The [skills that ship with Claude Code](https://code.claude.com/docs/en/skills#bundled-skills) (`/code-review`, `/batch`, `/debug`, `/loop`, `/claude-api`, `/verify`, …) and bundled workflows. Built-in commands like `/init` stay typable but are hidden from the model. |
+| `disableClaudeAiConnectors: true` | Automatic connection of the MCP connectors you set up on claude.ai (Gmail, Drive, …). Connectors you pass explicitly with `--mcp-config` still work. |
+| `disableRemoteControl: true` | [Remote Control](https://code.claude.com/docs/en/remote-control), which lets claude.ai/code or the Claude app drive a session on your machine. It's off unless you start it (`/remote-control`, `--rc`, or `remoteControlAtStartup`), so this only stops it from being turned on. |
+| `disableAllHooks: true` | Every hook and `statusLine` command from settings files and plugins. |
+| `disableSkillShellExecution: true` | Inline shell commands in skills and custom slash commands; they're replaced with a placeholder. |
+| `disableAgentView: true` | Agent view: `claude agents`, `--bg`, `/background`, and the on-demand daemon. |
+
+The rest are for organizations' managed settings; see the [settings reference](https://code.claude.com/docs/en/settings-reference) (or [settings-reference.md](https://code.claude.com/docs/en/settings-reference.md) if you're a bot).
+
+<h3 id="context-all">`/context all` shows what's using context</h3>
+
+This is a handy way to see the token costs of all MCP servers, skills, and memory files. Here's mine in a fresh session:
+<TerminalCapture capture={contextAll} />
+
+<h2 id="how">How to decide</h2>
+
+**Give the agent what it needs.** If the model's context window leaves out important instructions or tools, or includes junk it doesn't need, the agent will tenaciously work with whatever it has to get the job done. The worst junk is a falsehood that actively points it in the wrong direction. The agent will be more efficient, reliable, and helpful when the contents of the context window are exactly what it needs. That includes tool definitions, the system prompt, CLAUDE.md files, any harness nudges, and the conversation itself, so ask for what you actually want, not for things you won't read or use.
+
+**Pay attention to individual traces.** Agents are not (yet?) good at recognizing systemic friction. If they can work around a problem, the costs remain hidden from you. On a team, attentively working with individuals produces more insight than a broad formal survey. In the same way, curiosity about the moment-to-moment experience of agents is super valuable. When you notice friction, the agent is often great at helping to diagnose and fix it, but you have to ask. (Aside: it baffles me how underutilized forking and rewinding are; they're the perfect tools for side quests like this. I'll write more on this soon.)
+
+The more you give them what they need, the less attention you'll need to pay. But don't stop paying attention too early.

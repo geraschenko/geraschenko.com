@@ -1,0 +1,24 @@
+---
+// A terminal capture (ANSI text, e.g. from `tmux capture-pane -e`), drawn on
+// a character grid like the terminal it came from.
+import { Code } from 'astro:components';
+import { terminalCellsTransformer } from './terminal-cells';
+
+interface Props {
+  capture: string;
+}
+const { capture } = Astro.props;
+---
+
+<Code code={capture} lang="ansi" transformers={[terminalCellsTransformer]} />
+
+<style is:global>
+  .terminal-cell {
+    display: inline-block;
+    width: 1ch;
+    text-align: center;
+  }
+  .terminal-cell.wide {
+    width: 2ch;
+  }
+</style>

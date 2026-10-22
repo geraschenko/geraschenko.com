@@ -21,41 +21,40 @@ const cardEntries = Object.entries(cards);
 </div>
 
 <style>
-
-.hand {
-  display: inline-block;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 6px;
-  margin: 6px;
-  margin-top: -1.5em;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  text-align: center;
-}
-@media (max-width: 600px) {
   .hand {
-    margin-top: 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 6px;
+    margin: 6px;
+    margin-top: -1.5em;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    text-align: center;
   }
-}
+  @media (max-width: 600px) {
+    .hand {
+      margin-top: 0;
+    }
+  }
 
-.cards {
-  display: flex;
-}
+  .cards {
+    display: flex;
+  }
 
-.unattached-paperclips {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .unattached-paperclips {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.player-name {
-  font-size: 1em;
-  margin: -0.3em;
-}
+  .player-name {
+    font-size: 1em;
+    margin: -0.3em;
+  }
 
-.paperclip {
-  font-size: 1em;
-  margin: -0.3em 0;
-}
+  .paperclip {
+    font-size: 1em;
+    margin: -0.3em 0;
+  }
 </style>

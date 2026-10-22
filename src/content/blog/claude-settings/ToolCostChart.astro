@@ -1,0 +1,188 @@
+---
+// Labelled bar chart of per-tool context cost; each row expands to the tool's
+// description and parameters. tool-costs-hero.svg is the label-free version.
+import toolSettings from './tool-settings.json';
+import toolCostsJson from './tool-costs.json';
+import { schemaParams } from './schema-params';
+import {
+  barColours,
+  chartOrder,
+  removedToolNames,
+  toolSchemas,
+  type ToolCosts,
+  type ToolSchema,
+} from './tool-costs';
+import { renderToolMarkdown } from './tool-markdown';
+import SchemaParams from './SchemaParams.astro';
+
+const toolCosts: ToolCosts = toolCostsJson;
+if (toolCosts.claudeVersion !== toolSchemas.claudeVersion) {
+  throw new Error(
+    `tool-costs.json is for Claude Code ${toolCosts.claudeVersion}, tool-schemas.json for ` +
+      `${toolSchemas.claudeVersion}; rerun generate-tool-costs.ts`,
+  );
+}
+const toolSchemaByName = new Map(toolSchemas.tools.map((tool) => [tool.name, tool]));
+const toolSchema = (name: string): ToolSchema => {
+  const schema = toolSchemaByName.get(name);
+  if (!schema) throw new Error(`tool-costs.json lists ${name}, absent from tool-schemas.json`);
+  return schema;
+};
+
+const orderedCosts = chartOrder(toolCosts.tools);
+const removedNames = removedToolNames(toolSettings);
+const maxTokens = Math.max(...orderedCosts.map((cost) => cost.tokens));
+const chartGroups = [
+  { heading: 'Always included', costs: orderedCosts.filter((cost) => !cost.isDeferred) },
+  {
+    heading: 'Deferred: included only if fetched',
+    costs: orderedCosts.filter((cost) => cost.isDeferred),
+  },
+];
+
+// Line-break opportunities at camelCase boundaries, so narrow screens wrap
+// `DeferredToolPlaceholder` between words.
+const nameWords = (name: string): string[] => name.split(/(?<=[a-z])(?=[A-Z])/);
+---
+
+Number of tokens each tool adds to a request, counted by the API for {toolCosts.tokenizerModel}.
+This is the tool list for Claude Code {toolCosts.claudeVersion}. Click a tool to see its definition.
+Tools removed by the settings above are indicated by <span class="swatch" />.
+<figure class="tool-cost-chart">
+  <div class="rows">
+    {chartGroups.map((group) => (
+      <>
+        <h3>{group.heading}</h3>
+        {group.costs.map((cost) => {
+          const schema = toolSchema(cost.name);
+          const params = schemaParams(schema.input_schema);
+          return (
+            <details
+              class:list={{ removed: removedNames.has(cost.name), deferred: cost.isDeferred }}
+            >
+              <summary>
+                <code class="name">
+                  {nameWords(cost.name).map((word, i) =>
+                    i > 0 ? (
+                      <>
+                        <wbr />
+                        {word}
+                      </>
+                    ) : (
+                      word
+                    ),
+                  )}
+                </code>
+                <span class="bar" style={`width: ${(cost.tokens / maxTokens) * 100}%`} />
+                <span class="tokens">{cost.tokens}</span>
+              </summary>
+              <div class="tool-detail">
+                <Fragment set:html={renderToolMarkdown(schema.description)} />
+                <p class="detail-label">Parameters</p>
+                {params.length > 0 ? <SchemaParams params={params} /> : <p>None.</p>}
+              </div>
+            </details>
+          );
+        })}
+      </>
+    ))}
+  </div>
+</figure>
+<style define:vars={{ keptBarColour: barColours.kept, removedBarColour: barColours.removed }}>
+  .tool-cost-chart {
+    margin: 2em 0;
+  }
+  /* One grid for every row, so the name column is as wide as the widest name. */
+  .rows {
+    display: grid;
+    grid-template-columns: minmax(min-content, max-content) 1fr auto;
+    column-gap: 0.6em;
+  }
+  h3 {
+    grid-column: 1 / -1;
+    margin: 1em 0 0.4em;
+    font-size: 1.1rem;
+  }
+  details,
+  summary {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  details::details-content {
+    grid-column: 1 / -1;
+  }
+  summary {
+    align-items: center;
+    padding: 0.1em 0;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover {
+    background: rgba(var(--gray-light), 60%);
+  }
+  .name {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+  }
+  .name::before {
+    content: '▸ ';
+    color: rgb(var(--gray));
+  }
+  details[open] .name::before {
+    content: '▾ ';
+  }
+  /* The bar sits in the middle column, scaled against the widest tool. */
+  .bar {
+    height: 0.9em;
+    border-radius: 3px;
+    background: var(--keptBarColour);
+  }
+  .tokens {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.85em;
+  }
+  .removed .bar,
+  .swatch {
+    background: var(--removedBarColour);
+  }
+  .deferred .bar {
+    opacity: 0.25;
+  }
+  .tool-detail {
+    margin: 0.3em 0 1em 1em;
+    padding: 0.2em 1em;
+    border-left: 3px solid rgb(var(--gray-light));
+    font-size: 0.9em;
+  }
+  .tool-detail :global(:is(h4, h5, h6)) {
+    font-size: 1em;
+    margin: 1em 0 0.3em;
+  }
+  .tool-detail :global(pre) {
+    padding: 0.8em;
+    overflow-x: auto;
+    background: rgb(var(--gray-light));
+  }
+  .detail-label {
+    font-weight: bold;
+    margin-bottom: 0;
+  }
+  .swatch {
+    display: inline-block;
+    width: 0.9em;
+    height: 0.9em;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+  figcaption {
+    margin-top: 1em;
+    font-size: 0.85em;
+    color: rgb(var(--gray));
+  }
+</style>

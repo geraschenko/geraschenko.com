@@ -1,8 +1,8 @@
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content';
 
 /** A post that belongs to a series but is not that series' overview page. */
-export function isSeriesPart(post: CollectionEntry<"blog">): boolean {
-	return !!post.data.series && !post.data.seriesOverview;
+export function isSeriesPart(post: CollectionEntry<'blog'>): boolean {
+  return !!post.data.series && !post.data.seriesOverview;
 }
 
 /**
@@ -12,12 +12,12 @@ export function isSeriesPart(post: CollectionEntry<"blog">): boolean {
  * every other post it is the post's own `pubDate`.
  */
 export function effectiveDate(
-	post: CollectionEntry<"blog">,
-	allPosts: CollectionEntry<"blog">[],
+  post: CollectionEntry<'blog'>,
+  allPosts: CollectionEntry<'blog'>[],
 ): Date {
-	if (!post.data.seriesOverview) return post.data.pubDate;
-	const seriesDates = allPosts
-		.filter((p) => p.data.series === post.data.series)
-		.map((p) => p.data.pubDate.valueOf());
-	return new Date(Math.max(...seriesDates));
+  if (!post.data.seriesOverview) return post.data.pubDate;
+  const seriesDates = allPosts
+    .filter((p) => p.data.series === post.data.series)
+    .map((p) => p.data.pubDate.valueOf());
+  return new Date(Math.max(...seriesDates));
 }

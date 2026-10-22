@@ -1,0 +1,6 @@
+{
+  "includes": ["**/*.md"],
+  "excludes": ["node_modules/**", "dist/**"],
+  "markdown": { "emphasisKind": "asterisks", "strongKind": "asterisks" },
+  "plugins": ["https://plugins.dprint.dev/markdown-0.21.1.wasm"]
+}

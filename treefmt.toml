@@ -1,0 +1,20 @@
+# MDX is left alone: prettier parses MDX 1 only, and the posts are hand-written
+# prose. Captures and generated data stay as their producers wrote them.
+excludes = [
+  "node_modules/**",
+  "dist/**",
+  ".astro/**",
+  # npm rewrites both on install.
+  "package.json",
+  "package-lock.json",
+]
+
+[formatter.prettier]
+command = "node_modules/.bin/prettier"
+options = ["--write"]
+includes = ["*.ts", "*.mjs", "*.js", "*.astro", "*.css", "*.json"]
+
+[formatter.dprint]
+command = "dprint"
+options = ["fmt", "--config", "dprint.json"]
+includes = ["*.md"]

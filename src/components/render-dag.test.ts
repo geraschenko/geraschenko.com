@@ -39,8 +39,7 @@ function cellText(cell: Cell, nodeGlyph: string): string {
     case 'strokes': {
       const { up, down, left, right } = cell.strokes;
       if (up === 'dashed' && down === 'dashed' && !left && !right) return '╷ ';
-      const key =
-        (up ? 'U' : '') + (down ? 'D' : '') + (left ? 'L' : '') + (right ? 'R' : '');
+      const key = (up ? 'U' : '') + (down ? 'D' : '') + (left ? 'L' : '') + (right ? 'R' : '');
       return STROKES_GLYPH[key]!;
     }
   }
@@ -60,7 +59,10 @@ function art(rows: DagRow[]): string {
       const message = line.kind === 'node' ? ` ${row.node.message}` : '';
       lines.push((prefix + message).trimEnd());
     }
-    const filler = row.fillerColumns.map((c) => FILLER_GLYPH[c]).join(' ').trimEnd();
+    const filler = row.fillerColumns
+      .map((c) => FILLER_GLYPH[c])
+      .join(' ')
+      .trimEnd();
     if (filler !== '') lines.push(filler);
   }
   return lines.join('\n');
@@ -126,7 +128,10 @@ describe('dagRows', () => {
   });
 
   it('renders anonymous ancestors natively (below)', () => {
-    const nodes: DagNodeInput[] = [{ id: '2', parents: ['1'] }, { id: '1', anonymousAncestors: 1 }];
+    const nodes: DagNodeInput[] = [
+      { id: '2', parents: ['1'] },
+      { id: '1', anonymousAncestors: 1 },
+    ];
     expect(art(dagRows(nodes, 'below'))).toMatchInlineSnapshot(`
       "•  2
       │
@@ -243,9 +248,9 @@ describe('linePaths', () => {
     );
     // ╭─ at cell 1: overdrawn stub up to the bottom edge, quarter arc to
     // 0.5ch right of center, then out to the edge.
-    expect(linePaths([strokes({}), strokes({ down: 'solid', right: 'solid' })], 'curved').solid).toBe(
-      'M 2.5 1.05 L 2.5 1 A 0.5 0.5 0 0 1 3 0.5 L 4 0.5',
-    );
+    expect(
+      linePaths([strokes({}), strokes({ down: 'solid', right: 'solid' })], 'curved').solid,
+    ).toBe('M 2.5 1.05 L 2.5 1 A 0.5 0.5 0 0 1 3 0.5 L 4 0.5');
   });
 
   it('draws square corners as polylines through the center', () => {
@@ -256,10 +261,12 @@ describe('linePaths', () => {
 
   it('draws junctions as crossing segments, styled per arm', () => {
     // ├ with a dashed right arm (the mixed cell from the ancestor-merge test).
-    expect(linePaths([strokes({ up: 'solid', down: 'solid', right: 'dashed' })], 'curved')).toEqual({
-      solid: 'M 0.5 0 L 0.5 1.05',
-      dashed: 'M 0.5 0.5 L 2 0.5',
-    });
+    expect(linePaths([strokes({ up: 'solid', down: 'solid', right: 'dashed' })], 'curved')).toEqual(
+      {
+        solid: 'M 0.5 0 L 0.5 1.05',
+        dashed: 'M 0.5 0.5 L 2 0.5',
+      },
+    );
   });
 
   it('emits nothing for node, term, and empty cells', () => {

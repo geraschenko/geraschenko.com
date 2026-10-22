@@ -1,0 +1,58 @@
+---
+// A tool's input parameters as a nested list.
+import type { SchemaParam } from './schema-params';
+import { renderToolMarkdown } from './tool-markdown';
+
+interface Props {
+  params: SchemaParam[];
+}
+
+const { params } = Astro.props;
+---
+
+<dl class="schema-params">
+  {params.map((param) => (
+    <>
+      <dt>
+        <code class="param-name">{param.name}</code>
+        <code class="param-type">{param.type}</code>
+        {param.isRequired ? <span class="param-note">required</span> : null}
+        {param.bounds.map((bound) => (
+          <span class="param-note">{bound}</span>
+        ))}
+        {param.defaultLiteral === undefined ? null : (
+          <span class="param-note">
+            default <code>{param.defaultLiteral}</code>
+          </span>
+        )}
+      </dt>
+      <dd>
+        {param.description ? <Fragment set:html={renderToolMarkdown(param.description)} /> : null}
+        {param.fields.length > 0 ? <Astro.self params={param.fields} /> : null}
+      </dd>
+    </>
+  ))}
+</dl>
+
+<style>
+  .schema-params {
+    margin: 0.5em 0;
+  }
+  dt {
+    margin-top: 0.6em;
+  }
+  dd {
+    margin: 0.2em 0 0 1.5em;
+  }
+  dd :global(p) {
+    margin: 0.2em 0;
+  }
+  .param-name {
+    font-weight: bold;
+  }
+  .param-type,
+  .param-note {
+    margin-left: 0.5em;
+    color: rgb(var(--gray));
+  }
+</style>

@@ -54,10 +54,9 @@ function lineGlyphs(cells: Cell[]): Glyph[] {
 ---
 
 <figure class="render-dag">
-  {
-    rows.map((row, i) => {
-      const prefillColumns = i > 0 && !row.separator ? rows[i - 1]!.fillerColumns : [];
-      return (
+  {rows.map((row, i) => {
+    const prefillColumns = i > 0 && !row.separator ? rows[i - 1]!.fillerColumns : [];
+    return (
       <>
         {row.separator && <div class="dag-sep" />}
         <div class:list={['dag-row', row.node.className]}>
@@ -107,11 +106,7 @@ function lineGlyphs(cells: Cell[]): Glyph[] {
                   </svg>
                   {lineGlyphs(line.cells).map((glyph) => (
                     <span class="dag-glyph" style={`left: ${2 * glyph.cellIndex}ch`}>
-                      {glyph.type === 'term' ? (
-                        '~'
-                      ) : (
-                        <Fragment set:html={row.node.glyph} />
-                      )}
+                      {glyph.type === 'term' ? '~' : <Fragment set:html={row.node.glyph} />}
                     </span>
                   ))}
                 </div>
@@ -138,9 +133,8 @@ function lineGlyphs(cells: Cell[]): Glyph[] {
           <div class="dag-msg" set:html={row.node.message} />
         </div>
       </>
-      );
-    })
-  }
+    );
+  })}
 </figure>
 
 <style is:global>

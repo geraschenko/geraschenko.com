@@ -1,0 +1,151 @@
+{
+  "claudeVersion": "2.1.280",
+  "tokenizerModel": "claude-opus-5-5",
+  "tools": [
+    {
+      "name": "Agent",
+      "isDeferred": false,
+      "tokens": 1072
+    },
+    {
+      "name": "AskUserQuestion",
+      "isDeferred": false,
+      "tokens": 1464
+    },
+    {
+      "name": "Bash",
+      "isDeferred": false,
+      "tokens": 1072
+    },
+    {
+      "name": "CronCreate",
+      "isDeferred": true,
+      "tokens": 1510
+    },
+    {
+      "name": "CronDelete",
+      "isDeferred": true,
+      "tokens": 151
+    },
+    {
+      "name": "CronList",
+      "isDeferred": true,
+      "tokens": 99
+    },
+    {
+      "name": "DeferredToolPlaceholder",
+      "isDeferred": true,
+      "tokens": 78
+    },
+    {
+      "name": "DesignSync",
+      "isDeferred": true,
+      "tokens": 3322
+    },
+    {
+      "name": "Edit",
+      "isDeferred": false,
+      "tokens": 348
+    },
+    {
+      "name": "EnterPlanMode",
+      "isDeferred": true,
+      "tokens": 1612
+    },
+    {
+      "name": "EnterWorktree",
+      "isDeferred": true,
+      "tokens": 1396
+    },
+    {
+      "name": "ExitPlanMode",
+      "isDeferred": true,
+      "tokens": 880
+    },
+    {
+      "name": "ExitWorktree",
+      "isDeferred": true,
+      "tokens": 913
+    },
+    {
+      "name": "ListAgents",
+      "isDeferred": false,
+      "tokens": 405
+    },
+    {
+      "name": "Monitor",
+      "isDeferred": true,
+      "tokens": 2989
+    },
+    {
+      "name": "NotebookEdit",
+      "isDeferred": true,
+      "tokens": 632
+    },
+    {
+      "name": "PushNotification",
+      "isDeferred": true,
+      "tokens": 580
+    },
+    {
+      "name": "Read",
+      "isDeferred": false,
+      "tokens": 608
+    },
+    {
+      "name": "RemoteTrigger",
+      "isDeferred": true,
+      "tokens": 1329
+    },
+    {
+      "name": "ReportFindings",
+      "isDeferred": false,
+      "tokens": 821
+    },
+    {
+      "name": "ScheduleWakeup",
+      "isDeferred": false,
+      "tokens": 1695
+    },
+    {
+      "name": "SendMessage",
+      "isDeferred": true,
+      "tokens": 1991
+    },
+    {
+      "name": "Skill",
+      "isDeferred": false,
+      "tokens": 623
+    },
+    {
+      "name": "TaskStop",
+      "isDeferred": true,
+      "tokens": 302
+    },
+    {
+      "name": "ToolSearch",
+      "isDeferred": false,
+      "tokens": 535
+    },
+    {
+      "name": "WebFetch",
+      "isDeferred": true,
+      "tokens": 332
+    },
+    {
+      "name": "WebSearch",
+      "isDeferred": true,
+      "tokens": 310
+    },
+    {
+      "name": "Workflow",
+      "isDeferred": false,
+      "tokens": 1979
+    },
+    {
+      "name": "Write",
+      "isDeferred": false,
+      "tokens": 236
+    }
+  ]
+}

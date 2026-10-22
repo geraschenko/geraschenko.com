@@ -1,0 +1,37 @@
+[0m[38;5;174m[48;5;16m[39m[49m[1m[0m[38;5;246m[39m[38;5;174m[48;5;16m[49m[39m[38;5;246m[39m[38;5;174m[39m[38;5;246m[39m[38;5;246m[48;5;237m❯[39m [38;5;231m/context all[39m [49m
+[38;5;246m  ⎿  [1m[39mContext Usage[0m
+     [38;5;244m⛁ [38;5;246m⛁ ⛁ ⛁ ⛀ [38;5;174m⛁ ⛁ ⛁ ⛀ [38;5;220m⛀ [39m  Opus 5.5
+     [38;5;140m⛀ [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m  [38;5;246mclaude-opus-5-5[39m
+     [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m  [38;5;246m16.8k/200k tokens (8%)[39m
+     [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m
+     [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m  [3m[38;5;246mEstimated usage by category[0m
+     [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m  [38;5;244m⛁[39m System prompt: [38;5;246m2k tokens (1.0%)[39m
+     [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m  [38;5;246m⛁[39m System tools: [38;5;246m7.1k tokens (3.5%)[39m
+     [38;5;246m⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ [39m  [38;5;174m⛁[39m Memory files: [38;5;246m7.3k tokens (3.6%)[39m
+     [38;5;246m⛶ ⛶ ⛶ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ [39m  [38;5;220m⛁[39m Skills: [38;5;246m472 tokens (0.2%)[39m
+     [38;5;246m⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ [39m  [38;5;140m⛁[39m Messages: [38;5;246m10 tokens (0.0%)[39m
+                           [38;5;246m⛶[39m Free space: [38;5;246m150.2k (75.1%)[39m
+                           [38;5;246m⛝ Autocompact buffer: 33k tokens (16.5%)[39m
+
+     [1mAuto-compact window: [0m[38;5;246m200k tokens[39m
+
+     [1mMemory files[0m[38;5;246m · /memory[39m
+     [38;5;246m├[39m ~/.claude/CLAUDE.md: [38;5;246m6.3k tokens[39m
+     [38;5;246m├[39m CLAUDE.md: [38;5;246m16 tokens[39m
+     [38;5;246m├[39m AGENTS.md: [38;5;246m684 tokens[39m
+     [38;5;246m└[39m ~/.claude/projects/…/memory/MEMORY.md: [38;5;246m231 tokens[39m
+
+     [1mSkills[0m[38;5;246m · /skills[39m
+
+     [38;5;246mUser[39m
+     [38;5;246m├[39m codebase-design: [38;5;246m~100 tokens[39m
+     [38;5;246m├[39m design-doc: [38;5;246m~70 tokens[39m
+     [38;5;246m├[39m youtube: [38;5;246m~70 tokens
+[39m     [38;5;246m├[39m derisk: [38;5;246m~50 tokens[39m
+     [38;5;246m├[39m writing-for-agents: [38;5;246m~40 tokens[39m
+     [38;5;246m├[39m reviewer: [38;5;246m~30 tokens[39m
+     [38;5;246m└[39m diagnose-bug: [38;5;246m~20 tokens[39m
+
+     [38;5;246mBuilt-in[39m
+     [38;5;246m└[39m plugin-authoring: [38;5;246m~90 tokens[39m
+[38;5;246m[39m[38;5;244m[39m[7m[0m[38;5;244m[39m[38;5;220m[38;5;246m[39m[0m

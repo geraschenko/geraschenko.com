@@ -1,46 +1,46 @@
 ---
-import { Image } from "astro:assets";
-import BaseHead from "../components/BaseHead.astro";
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
-import { Content as Home } from "../content/home.md";
-import antonHeadshot from "../assets/Anton.jpg";
+import { Image } from 'astro:assets';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { Content as Home } from '../content/home.md';
+import antonHeadshot from '../assets/Anton.jpg';
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			.headshot {
-				float: right;
-			}
-			@media (max-width: 720px) {
-				.headshot {
-					float: none;
-				}
-			}
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <style>
+      .headshot {
+        float: right;
+      }
+      @media (max-width: 720px) {
+        .headshot {
+          float: none;
+        }
+      }
 
-			:global(.scaled-image) {
-				height: 1.5em;
-				border-radius: 0px;
-				margin-bottom: -0.4em;
-			}
+      :global(.scaled-image) {
+        height: 1.5em;
+        border-radius: 0px;
+        margin-bottom: -0.4em;
+      }
 
-			main {
-				min-height: 340px;
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<figure class="headshot">
-				<Image src={antonHeadshot} alt="Anton" />
-			</figure>
-			<Home />
-		</main>
-		<Footer />
-	</body>
+      main {
+        min-height: 340px;
+      }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <figure class="headshot">
+        <Image src={antonHeadshot} alt="Anton" />
+      </figure>
+      <Home />
+    </main>
+    <Footer />
+  </body>
 </html>

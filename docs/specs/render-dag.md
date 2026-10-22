@@ -455,101 +455,101 @@ collapse is what discards dashedness at corners, not the data.
 **Instructions**: Update this section during each work session. Add new tasks, mark completed ones with [x], document decisions and problems encountered.
 
 - [x] 2026-07-23: Derisk discussion. Decisions: previous-node parent default in
-  RenderDAG; `parents: 'above' | 'below'` prop (default `'above'`), display
-  order always = listed order; custom HTML stage 3 replacing
-  `PrefixLinesToText` (no sentinel hack); multiline messages via stretchable
-  CSS filler from `padLines`; `line-height: 1` for edge continuity;
-  `minRowHeight: 1`; `separator` → small spacer row; no SessionTree wrapper
-  for now; spec lives in docs/specs/.
+      RenderDAG; `parents: 'above' | 'below'` prop (default `'above'`), display
+      order always = listed order; custom HTML stage 3 replacing
+      `PrefixLinesToText` (no sentinel hack); multiline messages via stretchable
+      CSS filler from `padLines`; `line-height: 1` for edge continuity;
+      `minRowHeight: 1`; `separator` → small spacer row; no SessionTree wrapper
+      for now; spec lives in docs/specs/.
 - [x] 2026-07-23: Verified children-as-parents inversion empirically against
-  `@geraschenko/renderdag` 0.1.0 (installed into this repo).
+      `@geraschenko/renderdag` 0.1.0 (installed into this repo).
 - [x] 2026-07-23: Review round: added branchy `parents="below"` example with
-  golden art. This exposed that the ordering requirement and the default
-  parent are direction-dependent; Definitions, validation, and success
-  criteria updated accordingly.
+      golden art. This exposed that the ordering requirement and the default
+      parent are direction-dependent; Definitions, validation, and success
+      criteria updated accordingly.
 - [x] 2026-07-23: Review round 2: vitest decided. Added `ancestors` +
-  `anonymousAncestors` (renamed from `anonymous_ancestors`, camelCase/number)
-  with direction-dependent `~` placement: native feed attachment for
-  `'below'`, synthetic `~` rows for `'above'` (verified empirically). Default
-  parent suppressed when any ancestry field is present.
+      `anonymousAncestors` (renamed from `anonymous_ancestors`, camelCase/number)
+      with direction-dependent `~` placement: native feed attachment for
+      `'below'`, synthetic `~` rows for `'above'` (verified empirically). Default
+      parent suppressed when any ancestry field is present.
 - [x] 2026-07-23: Set up vitest (`npm i -D vitest`, `vitest.config.ts` via
-  `getViteConfig`, `npm test` script).
+      `getViteConfig`, `npm test` script).
 - [x] 2026-07-23: Implement `src/components/render-dag.ts` (`dagRows`) with
-  tests (15 passing; golden box-art snapshots verified against native
-  renderdag text output).
+      tests (15 passing; golden box-art snapshots verified against native
+      renderdag text output).
 - [x] 2026-07-23: Implement `src/components/RenderDAG.astro` (template +
-  global styles).
+      global styles).
 - [x] 2026-07-23: Screenshot check (headless Firefox on the built site): edge
-  continuity, filler alignment, multiline wrapping message, dashed ancestors,
-  synthetic `~` row, HTML glyph, separator spacing all render correctly.
+      continuity, filler alignment, multiline wrapping message, dashed ancestors,
+      synthetic `~` row, HTML glyph, separator spacing all render correctly.
 - [x] 2026-07-23: Convert compaction-post diagrams (TUI view, relinked chains,
-  chain formula); prose mentions and YAML snippets left as-is. Conversion kept
-  minimal: plain chains with default glyphs; the `[compacted]` TUI entry uses
-  glyph `○` and a `<code>` message. Styling/classes for summary/boundary
-  categories deferred to review.
+      chain formula); prose mentions and YAML snippets left as-is. Conversion kept
+      minimal: plain chains with default glyphs; the `[compacted]` TUI entry uses
+      glyph `○` and a `<code>` message. Styling/classes for summary/boundary
+      categories deferred to review.
 - Note: `src/pages/dag-test.astro` is a temporary visual-check page (renders
   all component features); delete before publishing or keep as a demo.
 - [x] 2026-07-23 review feedback round (TDC comments in commit 1758f99).
-  **All proposals below APPROVED by Anton 2026-07-23**, except the
-  square/curved glyph-set API, which is DEFERRED to the SVG round (it will
-  likely become a corner-style knob on the SVG renderer rather than a
-  renderdag glyph-table choice; remove that TDC comment when starting the
-  SVG design). Implementation order: dev-only page, escapeHtml TDC removal,
-  `'•'` default glyph (remove each TDC comment as it's addressed), then the
-  CSS/SVG renderer as a spec expansion (see below). The renderdag-ts
-  PrefixLine-export handoff is being handled by Anton via another agent;
-  he'll report back when the package is updated.
-  **Small items completed 2026-07-23:**
+      **All proposals below APPROVED by Anton 2026-07-23**, except the
+      square/curved glyph-set API, which is DEFERRED to the SVG round (it will
+      likely become a corner-style knob on the SVG renderer rather than a
+      renderdag glyph-table choice; remove that TDC comment when starting the
+      SVG design). Implementation order: dev-only page, escapeHtml TDC removal,
+      `'•'` default glyph (remove each TDC comment as it's addressed), then the
+      CSS/SVG renderer as a spec expansion (see below). The renderdag-ts
+      PrefixLine-export handoff is being handled by Anton via another agent;
+      he'll report back when the package is updated.
+      **Small items completed 2026-07-23:**
   - [x] dev-only page verified: `npm run dev` serves /dag-test (200, correct
-    content); `npm run build` emits no dist/dag-test and the sitemap has no
-    entry for it.
+        content); `npm run build` emits no dist/dag-test and the sitemap has no
+        entry for it.
   - [x] escapeHtml TDC removed; the 5-liner stays with a rationale comment
-    (JS has no stdlib HTML-escape).
+        (JS has no stdlib HTML-escape).
   - [x] Default glyph changed `'●'` → `'•'`; TDC removed; snapshots updated
-    with `vitest run -u` (pure glyph substitution, art unchanged) plus one
-    non-snapshot assertion; 15/15 tests pass; screenshot-checked — the
-    bullet is visibly lighter and stays centered on its edge column.
-  **CSS/SVG stage-2 renderer approved** as the alignment fix (skip the
-  webfont and em-sizing mitigations; go straight to drawing edges
-  ourselves). To be specced by EXPANDING THIS SPEC (not a separate doc).
-  Derisk round completed 2026-07-23 — all open questions resolved and the
-  cell/stroke type design approved; see "SVG renderer derisk findings" in
-  IMPLEMENTATION IDEAS. Also done 2026-07-23: renderdag bumped to v0.1.1
-  (Anton, via the other agent) and our imports updated to use the now-public
-  root exports (`PrefixLine`, `isRepeatable`); fixed implicit-`any` errors
-  in the `devPages` integration with an `AstroIntegration` annotation;
-  15/15 tests and `astro check` clean.
+        with `vitest run -u` (pure glyph substitution, art unchanged) plus one
+        non-snapshot assertion; 15/15 tests pass; screenshot-checked — the
+        bullet is visibly lighter and stays centered on its edge column.
+        **CSS/SVG stage-2 renderer approved** as the alignment fix (skip the
+        webfont and em-sizing mitigations; go straight to drawing edges
+        ourselves). To be specced by EXPANDING THIS SPEC (not a separate doc).
+        Derisk round completed 2026-07-23 — all open questions resolved and the
+        cell/stroke type design approved; see "SVG renderer derisk findings" in
+        IMPLEMENTATION IDEAS. Also done 2026-07-23: renderdag bumped to v0.1.1
+        (Anton, via the other agent) and our imports updated to use the now-public
+        root exports (`PrefixLine`, `isRepeatable`); fixed implicit-`any` errors
+        in the `devPages` integration with an `AstroIntegration` annotation;
+        15/15 tests and `astro check` clean.
 - [x] 2026-07-23: SPEC section rewritten for the SVG renderer (problem
-  statement, success criteria, cell/corner/dash definitions, type design
-  with `CellLine`/`linePaths` and the `corners` prop, data flow, cost, edge
-  cases incl. dash-rhythm anisotropy, non-goals). Critique pass fixed:
-  prefill added to the template sketch, `linePaths` coordinates made
-  explicitly run-relative, `corners` added to data flow, stale
-  BoxDrawing/minRowHeight claim in IMPLEMENTATION IDEAS corrected. Spec
-  APPROVED by Anton 2026-07-23; implementation approved.
+      statement, success criteria, cell/corner/dash definitions, type design
+      with `CellLine`/`linePaths` and the `corners` prop, data flow, cost, edge
+      cases incl. dash-rhythm anisotropy, non-goals). Critique pass fixed:
+      prefill added to the template sketch, `linePaths` coordinates made
+      explicitly run-relative, `corners` added to data flow, stale
+      BoxDrawing/minRowHeight claim in IMPLEMENTATION IDEAS corrected. Spec
+      APPROVED by Anton 2026-07-23; implementation approved.
 - [x] SVG renderer implementation (2026-07-23), all done:
   - [x] Type stubs compiled first, then implementation.
   - [x] `shapeToCellLines` mirrors box_drawing.js dispatch; all 15 existing
-    golden snapshots reproduced BYTE-FOR-BYTE unchanged through the new
-    pipeline (strong port-fidelity evidence). Added a dashed-corner
-    assertion test (moving ancestor edge: `{up: dashed, left: dashed}`
-    corner plus a mixed `├` cell with solid vertical + dashed right arm —
-    fidelity box chars can't express). BoxDrawing TDC comment removed.
+        golden snapshots reproduced BYTE-FOR-BYTE unchanged through the new
+        pipeline (strong port-fidelity evidence). Added a dashed-corner
+        assertion test (moving ancestor edge: `{up: dashed, left: dashed}`
+        corner plus a mixed `├` cell with solid vertical + dashed right arm —
+        fidelity box chars can't express). BoxDrawing TDC comment removed.
   - [x] `linePaths` implemented with 6 unit tests (arcs with hand-verified
-    sweep flags, square polylines, per-arm junction styling, dash-phase
-    merging of opposite same-style arms). 22/22 tests pass.
+        sweep flags, square polylines, per-arm junction styling, dash-phase
+        merging of opposite same-style arms). 22/22 tests pass.
   - [x] `RenderDAG.astro` rewritten: SVG runs via a `lineRuns` splitter,
-    node/term cells as 2ch spans, `corners` prop, shared
-    `--dag-line-width`/`--dag-dash` custom properties; `white-space: pre`
-    and the whitespace-tight markup requirement are gone (flex layout
-    ignores whitespace-only nodes).
+        node/term cells as 2ch spans, `corners` prop, shared
+        `--dag-line-width`/`--dag-dash` custom properties; `white-space: pre`
+        and the whitespace-tight markup requirement are gone (flex layout
+        ignores whitespace-only nodes).
   - [x] dag-test: added `corners="square"` and dashed-ancestor-corner
-    examples.
+        examples.
   - [x] Screenshot verification (headless Firefox + PIL): vertical strokes
-    measure EXACTLY x=25–26 (col 0) and x=49–50 (col 1) through SVG cells,
-    link lines, and gradient fillers — no kinks; bullet-row gaps identical
-    to the old rendering; dashed corner and square corners render
-    correctly; compaction post renders correctly unchanged.
+        measure EXACTLY x=25–26 (col 0) and x=49–50 (col 1) through SVG cells,
+        link lines, and gradient fillers — no kinks; bullet-row gaps identical
+        to the old rendering; dashed corner and square corners render
+        correctly; compaction post renders correctly unchanged.
   - [x] 22/22 tests, `astro check` 0 errors, `npm run build` green.
   - **dag-test dev-only**: proposal — move the page to
     `src/dev-pages/dag-test.astro` and add a tiny inline integration in
@@ -557,76 +557,76 @@ collapse is what discards dashedness at corners, not the data.
     (Underscore-prefix would disable it in dev too; there is no built-in
     dev-only page mechanism for static builds.)
 - [x] SVG-origin alignment fix (2026-07-23, approved by Anton): Anton's
-  screenshot showed residual vertical-connector jogs. Diagnosis (measured
-  via getBoundingClientRect + pixel screenshots + a minimal isolated repro):
-  layout was subpixel-exact, but Firefox pixel-snaps each SVG element's
-  rendering origin, so SVG runs starting mid-line after a 2ch glyph span
-  (fractional x, e.g. 21.667px) shifted their strokes ~0.4px relative to
-  full-line SVGs and gradient fillers. Fix: one full-width SVG per prefix
-  line (`linePaths(line.cells)` over the whole line — node/term cells
-  already contribute no paths), glyphs overlaid as absolutely-positioned
-  1ch spans at `left: {2i}ch`; `lineRuns` deleted, no `render-dag.ts` logic
-  changes. Verified: node-line strokes now measure identical pixel columns
-  to link lines and fillers ([44,45] throughout); all dag-test examples and
-  the compaction post render correctly; 22/22 tests, `astro check` clean,
-  build green. Known residual: SVG strokes vs. gradient fillers rasterize
-  by different mechanisms, so at fractional display scaling they can differ
-  by < 0.5 device px (antialiasing asymmetry, not a jog); fixing that would
-  need SVG fillers, which can't keep a height-independent dash rhythm.
-  [The residual was NOT acceptable in practice — see the next entry. The
-  dash-rhythm objection was wrong: it assumed viewBox scaling.]
+      screenshot showed residual vertical-connector jogs. Diagnosis (measured
+      via getBoundingClientRect + pixel screenshots + a minimal isolated repro):
+      layout was subpixel-exact, but Firefox pixel-snaps each SVG element's
+      rendering origin, so SVG runs starting mid-line after a 2ch glyph span
+      (fractional x, e.g. 21.667px) shifted their strokes ~0.4px relative to
+      full-line SVGs and gradient fillers. Fix: one full-width SVG per prefix
+      line (`linePaths(line.cells)` over the whole line — node/term cells
+      already contribute no paths), glyphs overlaid as absolutely-positioned
+      1ch spans at `left: {2i}ch`; `lineRuns` deleted, no `render-dag.ts` logic
+      changes. Verified: node-line strokes now measure identical pixel columns
+      to link lines and fillers ([44,45] throughout); all dag-test examples and
+      the compaction post render correctly; 22/22 tests, `astro check` clean,
+      build green. Known residual: SVG strokes vs. gradient fillers rasterize
+      by different mechanisms, so at fractional display scaling they can differ
+      by < 0.5 device px (antialiasing asymmetry, not a jog); fixing that would
+      need SVG fillers, which can't keep a height-independent dash rhythm.
+      [The residual was NOT acceptable in practice — see the next entry. The
+      dash-rhythm objection was wrong: it assumed viewBox scaling.]
 - [x] SVG-line fillers (2026-07-23): Anton's 2× screenshot showed the
-  residual was a real defect: gradient filler segments rendered 3 device px
-  wide at center 29 while SVG segments rendered 2 px at center 28.5 —
-  thickness + offset wobble at every cell/filler handoff. Isolated repro
-  confirmed: at identical fractional coordinates, a viewBox-scaled path and
-  a no-viewBox percentage-positioned `<line>` rasterize pixel-identically,
-  while a CSS gradient does not; and CSS `stroke-dasharray:
+      residual was a real defect: gradient filler segments rendered 3 device px
+      wide at center 29 while SVG segments rendered 2 px at center 28.5 —
+      thickness + offset wobble at every cell/filler handoff. Isolated repro
+      confirmed: at identical fractional coordinates, a viewBox-scaled path and
+      a no-viewBox percentage-positioned `<line>` rasterize pixel-identically,
+      while a CSS gradient does not; and CSS `stroke-dasharray:
   calc(0.25em …)` on a no-viewBox line keeps exact em rhythm regardless of
-  element height (the earlier "SVG dashes can't stretch" concern only
-  applies under viewBox scaling). Fix: fillers are `<svg>` (no viewBox)
-  with one `<line>` per non-blank column at a percentage x of the 2n·ch
-  width; `fillerStyle` → `fillerLines`; gradient custom properties removed;
-  filler dashes via `calc(var(--dag-dash) * 1em)`. Gotcha: a replaced
-  element's intrinsic 150px height inflates the flex container's intrinsic
-  size even with `height: 0`/`min-height: 0` (measured: rows grew to
-  174px), so the postfill SVG sits absolutely inside a plain flex-grow div.
-  Verified: grayscale stroke profiles are now byte-identical across every
-  segment of a column (cells, corner legs, fillers); only faint AA overlap
-  at seam rows. All dag-test examples + compaction post correct; 22/22
-  tests; `astro check` clean; build green.
+      element height (the earlier "SVG dashes can't stretch" concern only
+      applies under viewBox scaling). Fix: fillers are `<svg>` (no viewBox)
+      with one `<line>` per non-blank column at a percentage x of the 2n·ch
+      width; `fillerStyle` → `fillerLines`; gradient custom properties removed;
+      filler dashes via `calc(var(--dag-dash) * 1em)`. Gotcha: a replaced
+      element's intrinsic 150px height inflates the flex container's intrinsic
+      size even with `height: 0`/`min-height: 0` (measured: rows grew to
+      174px), so the postfill SVG sits absolutely inside a plain flex-grow div.
+      Verified: grayscale stroke profiles are now byte-identical across every
+      segment of a column (cells, corner legs, fillers); only faint AA overlap
+      at seam rows. All dag-test examples + compaction post correct; 22/22
+      tests; `astro check` clean; build green.
 - [x] **Seam gaps → downward overdraw** (Anton, 2026-07-23 18:50, screenshot
-  `~/Pictures/Screenshots/Screenshot_2026-07-23_18-50-42.png`): thickness
-  and alignment right, but ~1px horizontal gaps remained in vertical edges
-  at element boundaries. Measured in the screenshot: single rows where edge
-  ink drops from 214 to 57–143, at prefix-line and row boundaries — each
-  stacked SVG ends its stroke exactly at its box edge, and at fractional
-  device positions the two antialiased halves composite to less than full
-  ink. Fix: every vertical stroke overdraws 0.05em past its element's
-  BOTTOM edge only (`OVERDRAW = 0.05` in `linePaths` user units;
-  `--dag-overdraw: 0.05em` for fillers — postfill via
-  `height: calc(100% + …)`, prefill via extra SVG height plus a
-  compensating negative margin since it's a flex item). Downward-only
-  works because the element below always continues the edge (edge
-  continuity by construction), and it leaves dash phase untouched for
-  every path that starts at its top — the one exception is down-arm right
-  corners (`╭`), whose path starts at the bottom edge and gains a
-  `M x 1.05 L x 1` stub, shifting their dashed phase by 10% of a period
-  (imperceptible). Verified at a forced fractional font size (17.3px via
-  headless-profile userContent.css, which reproduced blank seam rows at
-  DPR 1): previously-blank seam rows (ink 6–8) now carry full ink
-  (165–166); the only other change is slight AA-overlap darkening at three
-  seam rows (166→203), the known-acceptable class. 22/22 tests
-  (three `linePaths` expectations updated for the overdrawn endpoints),
-  `astro check` clean, build green. Awaiting Anton's on-display check.
+      `~/Pictures/Screenshots/Screenshot_2026-07-23_18-50-42.png`): thickness
+      and alignment right, but ~1px horizontal gaps remained in vertical edges
+      at element boundaries. Measured in the screenshot: single rows where edge
+      ink drops from 214 to 57–143, at prefix-line and row boundaries — each
+      stacked SVG ends its stroke exactly at its box edge, and at fractional
+      device positions the two antialiased halves composite to less than full
+      ink. Fix: every vertical stroke overdraws 0.05em past its element's
+      BOTTOM edge only (`OVERDRAW = 0.05` in `linePaths` user units;
+      `--dag-overdraw: 0.05em` for fillers — postfill via
+      `height: calc(100% + …)`, prefill via extra SVG height plus a
+      compensating negative margin since it's a flex item). Downward-only
+      works because the element below always continues the edge (edge
+      continuity by construction), and it leaves dash phase untouched for
+      every path that starts at its top — the one exception is down-arm right
+      corners (`╭`), whose path starts at the bottom edge and gains a
+      `M x 1.05 L x 1` stub, shifting their dashed phase by 10% of a period
+      (imperceptible). Verified at a forced fractional font size (17.3px via
+      headless-profile userContent.css, which reproduced blank seam rows at
+      DPR 1): previously-blank seam rows (ink 6–8) now carry full ink
+      (165–166); the only other change is slight AA-overlap darkening at three
+      seam rows (166→203), the known-acceptable class. 22/22 tests
+      (three `linePaths` expectations updated for the overdrawn endpoints),
+      `astro check` clean, build green. Awaiting Anton's on-display check.
 - [x] **Overdraw bumps vs seam robustness — interim accepted, redesign
-  deferred** (Anton, 2026-07-23
-  19:17, screenshot `Screenshot_2026-07-23_19-17-08.png`): the 0.05em
-  overdraw creates 1–2 device-px "bumps" — measured as the stroke's side
-  AA fringe doubling in opacity (26→47, 85→135 out of 255) over the
-  overlap length. Anton's mitigation: `--dag-overdraw: 0.006em` (fillers
-  only; cell `OVERDRAW` still 0.05), which looks clean on his 2× display.
-  Follow-up findings (all measured):
+      deferred** (Anton, 2026-07-23
+      19:17, screenshot `Screenshot_2026-07-23_19-17-08.png`): the 0.05em
+      overdraw creates 1–2 device-px "bumps" — measured as the stroke's side
+      AA fringe doubling in opacity (26→47, 85→135 out of 255) over the
+      overlap length. Anton's mitigation: `--dag-overdraw: 0.006em` (fillers
+      only; cell `OVERDRAW` still 0.05), which looks clean on his 2× display.
+      Follow-up findings (all measured):
   - **No residual line spacing** — getBoundingClientRect at fractional
     page offset: prefix-line height exactly 1em (20.000px), all gaps
     exactly 0.000 (prefill→line, line→postfill, row→row). The negative
@@ -659,21 +659,21 @@ collapse is what discards dashedness at corners, not the data.
     unified-SVG redesign is appealing but deferred as a substantially
     larger change.
 - [x] **Cell dash spacing fix** (Anton, 2026-07-23 19:58, screenshot
-  `Screenshot_2026-07-23_19-58-54.png`): ancestor-edge dashes "insanely
-  closely spaced" on cell lines (measured: ~3px period dust) while filler
-  stretches were correct (0.5em period). Cause: `vector-effect:
+      `Screenshot_2026-07-23_19-58-54.png`): ancestor-edge dashes "insanely
+      closely spaced" on cell lines (measured: ~3px period dust) while filler
+      stretches were correct (0.5em period). Cause: `vector-effect:
   non-scaling-stroke` computes the entire stroke — dash pattern included —
-  in SCREEN space, so the cells' unitless `stroke-dasharray: 0.25` meant
-  0.25 screen px, not 0.25 user units (isolated test: unitless renders as
-  a fused solid line; the same path with `0.25em` renders 5px/5px at 20px
-  font, identical to a filler; same in both Firefox and Brave). Fix: one
-  em-based rule for everyone — `.dag-stroke-dashed { stroke-dasharray:
+      in SCREEN space, so the cells' unitless `stroke-dasharray: 0.25` meant
+      0.25 screen px, not 0.25 user units (isolated test: unitless renders as
+      a fused solid line; the same path with `0.25em` renders 5px/5px at 20px
+      font, identical to a filler; same in both Firefox and Brave). Fix: one
+      em-based rule for everyone — `.dag-stroke-dashed { stroke-dasharray:
   calc(var(--dag-dash) * 1em) … }`, filler-specific override deleted
-  (screen-space em == filler-user-unit em). Side effect: horizontal
-  dashed arms now dash at 0.25em instead of effectively-solid dust.
-  Verified: page diff shows only the dashed-ancestor example changed;
-  its cell vertical went from fused runs to a clean 5/5 rhythm matching
-  fillers. 22/22 tests, `astro check` clean, build green.
+      (screen-space em == filler-user-unit em). Side effect: horizontal
+      dashed arms now dash at 0.25em instead of effectively-solid dust.
+      Verified: page diff shows only the dashed-ancestor example changed;
+      its cell vertical went from fused runs to a clean 5/5 rhythm matching
+      fillers. 22/22 tests, `astro check` clean, build green.
   - **escapeHtml**: JS/Node has no standard-library HTML escape, and Astro
     doesn't export a public one. Options: keep the 5-liner, or depend on the
     `escape-html` npm package. Proposal: keep ours.
@@ -700,21 +700,21 @@ collapse is what discards dashedness at corners, not the data.
     Resolved: option (b) chosen and implemented (the SVG renderer above),
     plus the SVG-origin alignment fix.
 - [x] **Tile border + side-by-side pairs** (Anton, 2026-07-23 late):
-  disconnected graphs are confusing without visible bounds, and before/after
-  figure pairs in the compaction post should sit side by side on desktop.
-  The figure is now a shrink-to-fit tile: `width: fit-content; max-width:
+      disconnected graphs are confusing without visible bounds, and before/after
+      figure pairs in the compaction post should sit side by side on desktop.
+      The figure is now a shrink-to-fit tile: `width: fit-content; max-width:
   100%`, `1px solid rgba(var(--gray), 50%)` border, 8px radius (matching the
-  site's pre/img), `0.25em 0.75em` padding. New `.render-dags` wrapper class
-  (also in the component's global style block): flex row with `gap: 0 2em`,
-  children `min-width: 0`, stacking via a 720px media query. Deliberately no
-  `flex-wrap` — flexbox wraps at max-content size *before* shrinking, so a
-  tile with one long message line would stack prematurely; instead tiles
-  shrink and their messages wrap. Usage: `<div class="render-dags">`
-  around two `<div>`s each holding a caption + `<RenderDAG>`. (A raw
-  `<style>` tag in MDX does not work: micromark parses `{...}` CSS bodies as
-  JSX expressions and the build fails — component-level styling is the way.)
+      site's pre/img), `0.25em 0.75em` padding. New `.render-dags` wrapper class
+      (also in the component's global style block): flex row with `gap: 0 2em`,
+      children `min-width: 0`, stacking via a 720px media query. Deliberately no
+      `flex-wrap` — flexbox wraps at max-content size *before* shrinking, so a
+      tile with one long message line would stack prematurely; instead tiles
+      shrink and their messages wrap. Usage: `<div class="render-dags">`
+      around two `<div>`s each holding a caption + `<RenderDAG>`. (A raw
+      `<style>` tag in MDX does not work: micromark parses `{...}` CSS bodies as
+      JSX expressions and the build fails — component-level styling is the way.)
 - [x] **Finished** (Anton, 2026-10-19). RenderDAG is in use in the compaction
-  post and the review-commands post. Deferred, not planned:
+      post and the review-commands post. Deferred, not planned:
   - Unified-SVG redesign (one SVG per prefix with continuous per-column
     paths) for seam robustness; the 0.006em filler overdraw remains the
     accepted interim, with blank seams possible at DPR 1 plus fractional
