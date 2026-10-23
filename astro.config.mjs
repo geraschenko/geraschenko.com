@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { satteri } from '@astrojs/markdown-satteri';
 import { satteriKatex } from './plugins/satteri-katex.ts';
+import { satteriHeadingAnchors } from './plugins/satteri-heading-anchors.ts';
 
 // Pages in src/dev-pages/ are served in `astro dev` but excluded from builds.
 /** @type {import('astro').AstroIntegration} */
@@ -24,7 +25,7 @@ export default defineConfig({
   markdown: {
     processor: satteri({
       features: { math: true, smartPunctuation: true },
-      hastPlugins: [satteriKatex],
+      hastPlugins: [satteriKatex, satteriHeadingAnchors],
     }),
   },
 });

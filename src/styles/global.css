@@ -136,6 +136,29 @@ blockquote {
   margin: 0px;
   font-size: 1.333em;
 }
+/* The ¶ link plugins/satteri-heading-anchors.ts appends to each heading. The
+   glyph is CSS content so the heading's text stays unchanged. */
+.heading-anchor {
+  margin-left: 0.3em;
+  color: rgb(var(--gray));
+  text-decoration: none;
+  opacity: 0;
+}
+.heading-anchor::before {
+  content: '¶';
+}
+:is(h2, h3, h4, h5, h6):hover .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 1;
+}
+.heading-anchor:hover {
+  color: var(--accent);
+}
+@media (hover: none) {
+  .heading-anchor {
+    opacity: 0.3;
+  }
+}
 hr {
   border: none;
   border-top: 1px solid rgb(var(--gray-light));
