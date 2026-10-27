@@ -43,13 +43,11 @@ const { title, description } = Astro.props;
 {description && <meta property="twitter:description" content={description} />}
 
 <!-- Cloudflare Web Analytics, production builds only so dev visits aren't counted -->
-{
-  import.meta.env.PROD && (
-    <script
-      is:inline
-      type="module"
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "89c7a61259ba4435adae83420b46b122"}'
-    />
-  )
-}
+{import.meta.env.PROD && (
+  <script
+    is:inline
+    type="module"
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon='{"token": "89c7a61259ba4435adae83420b46b122"}'
+  />
+)}

@@ -20,7 +20,11 @@ function anchorTo(id: string): Element {
   return {
     type: 'element',
     tagName: 'a',
-    properties: { className: ['heading-anchor'], href: `#${id}`, ariaLabel: 'Link to this section' },
+    properties: {
+      className: ['heading-anchor'],
+      href: `#${id}`,
+      ariaLabel: 'Link to this section',
+    },
     children: [],
   };
 }

@@ -125,6 +125,65 @@ pre {
 pre > code {
   all: unset;
 }
+/* A framed code block (plugins/shiki-code-frame.ts): the title bar sits on top
+   of the pre and shares its rounded outline; the copy button sits in the
+   top-right corner, which is in the title bar when there is one. Both are
+   2.5rem tall so the button lines up with the bar. */
+figure.code-block {
+  position: relative;
+  margin: 1em 0;
+}
+figure.code-block > figcaption {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 2.5rem;
+  padding: 0 1.5em;
+  border-radius: 8px 8px 0 0;
+  background-color: #1b1f23;
+  color: #e1e4e8;
+  font-size: 0.85em;
+}
+figure.code-block > pre {
+  margin: 0;
+}
+figure.code-block > figcaption + pre {
+  border-radius: 0 0 8px 8px;
+}
+/* The button holds both icons; `data-copied` (set by src/scripts/code-copy.ts)
+   picks which one shows. */
+button.code-copy {
+  position: absolute;
+  top: 0;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #e1e4e8;
+  opacity: 0.6;
+  cursor: pointer;
+}
+button.code-copy svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+button.code-copy:hover,
+button.code-copy:focus-visible,
+button.code-copy[data-copied] {
+  opacity: 1;
+}
+button.code-copy .code-copy-done,
+button.code-copy[data-copied] .code-copy-idle {
+  display: none;
+}
+button.code-copy[data-copied] .code-copy-done {
+  display: block;
+}
 /* Markdown blocks hold prose, which should wrap; code keeps its lines. */
 pre[data-language='markdown'] {
   white-space: pre-wrap;

@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { satteri } from '@astrojs/markdown-satteri';
 import { satteriKatex } from './plugins/satteri-katex.ts';
 import { satteriHeadingAnchors } from './plugins/satteri-heading-anchors.ts';
+import { shikiCodeFrame } from './plugins/shiki-code-frame.ts';
 
 // Pages in src/dev-pages/ are served in `astro dev` but excluded from builds.
 /** @type {import('astro').AstroIntegration} */
@@ -23,6 +24,7 @@ export default defineConfig({
   site: 'https://geraschenko.com',
   integrations: [mdx(), sitemap(), devPages],
   markdown: {
+    shikiConfig: { transformers: [shikiCodeFrame()] },
     processor: satteri({
       features: { math: true, smartPunctuation: true },
       hastPlugins: [satteriKatex, satteriHeadingAnchors],
