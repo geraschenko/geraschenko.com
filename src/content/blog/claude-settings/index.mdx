@@ -2,6 +2,7 @@
 title: "Claude Code settings recommendations"
 description: "Settings to keep Claude Code from misinforming, contradicting, and burying its own agent."
 pubDate: 2026-10-23
+updatedDate: 2026-10-28
 heroImage: 'tool-costs-hero.svg'
 ---
 import { Code } from 'astro:components';
@@ -71,7 +72,7 @@ Token usage: 41210/180000; 138790 remaining
 The total is the context window size minus a reserve for the model's reply, so 180k for a 200k window. I enabled this recently, and I like that it makes the agent able to reason about its context window (e.g. "I'm getting close to auto-compaction, so I'd better record my progress."). However, you have to put something in your CLAUDE.md to explain what the limit _means_. Otherwise when context fills up it starts aggressively delegating to subagents because it worries that when it hits the limit it will be destroyed rather than compacted---a reasonable misunderstanding. I recommend something like this:
 
 ```markdown title="CLAUDE.md" copy
-**A full window compacts; the session continues.** You write the summary and keep working, with the transcript path for lookups. At high token usage, land at a clean state (notes, spec, a commit-ready tree) so the summary writes itself, then keep going.
+**A full window compacts; the session continues.** You write the summary and keep working, with the transcript path for lookups. At high token usage, land at a clean state (notes, spec, a commit-ready tree) so the summary writes itself, then keep going. Auto-compaction fires when the token usage reminder shows about 13-15k remaining.
 ```
 
 <h2 id="no-bash">Don't force Claude to use `sed -n "XX,YYp"` to read files</h2>
